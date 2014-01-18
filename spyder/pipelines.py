@@ -1,8 +1,3 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
 from scrapy import log
 import os, sys
 sys.path.append(os.path.abspath('..'))
@@ -12,6 +7,7 @@ from scrapy.exceptions import DropItem
 from goose import Goose
 import nltk
 from unidecode import unidecode
+import time
 
 class DuplicatesFilter(object):
 	'''
@@ -28,12 +24,17 @@ class DuplicatesFilter(object):
 		self.ID_TO_URL = "ID2URL"
 
 	def process_item(self, item, spider):
+		s = time.time()
 		if self.r.get("%s:%s" % (self.URL_TO_ID, item['url'])):
 			#duplicate
+			e = time.time()
+			print "DuplicatesFilter.process_item:found duplicate: ", e - s
 			raise DropItem
 		else:
 			#process new item
 			self.buildURLIndex(item)
+		e = time.time()
+		print "DuplicatesFilter.process_item:processed new url: ", e - s
 		return item
 
 	def buildURLIndex(self, item):
@@ -42,6 +43,7 @@ class DuplicatesFilter(object):
 		Each link's url is assigned an ID and vice versa
 		'''
 		#url has not been processed before
+		s = time.time()
 		self.r.sadd(self.URL_SET, item['url'])
 		self.r.set("%s:%d" % (self.ID_TO_URL, self.count), item['url'])
 		self.r.set("%s:%s" % (self.URL_TO_ID, item['url']), self.count)
@@ -53,6 +55,8 @@ class DuplicatesFilter(object):
 				self.r.set("%s:%s" % (self.URL_TO_ID, link), self.count)
 				self.r.set("%s:%d" % (self.ID_TO_URL, self.count), link)
 				self.count += 1
+		e = time.time()
+		print "DuplicatesFilter.buildURLIndex:processed", len(set(item['link_set'])), "links:", e - s
 
 
 class TextExtractor(object):
@@ -62,13 +66,14 @@ class TextExtractor(object):
 
 	def process_item(self, item, spider):
 		print item['url']
-
-		#item['extracted_text'] = self.g.extract(raw_html = item['raw_html']).cleaned_text
+		s = time.time()
 		temp = self.g.extract(raw_html = item['raw_html']).cleaned_text
 		try:
 			temp = unicode(temp, encoding = "UTF-8")
 		except: pass
 		item['extracted_text'] = unidecode(temp)
+		e = time.time()
+		print "TextExtractor.process_item: extracted textual content:", e - s
 		return item
 
 
@@ -86,12 +91,13 @@ class KeywordExtractor(object):
 		self.stemmer = nltk.stem.PorterStemmer()
 
 	def process_item(self, item, spider):
+		s = time.time()
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = nltk.wordpunct_tokenize(text)
 		self.buildWordIndex(words, item)
 
 		pos = nltk.pos_tag(words)
-		item['keywords'] = list(set([x[0] for x in pos if x[1] in ['NN', 'NNS', 'NNPS', 'NNP']]))
+		item['keywords'] = list(set([self.clean(x[0]) for x in pos if x[1] in ['NN', 'NNS', 'NNPS', 'NNP']]))
 
 		'''
 		*** For extracting noun phrases ***
@@ -106,6 +112,8 @@ class KeywordExtractor(object):
 			item['keywords'].add(st.strip())
 
 		'''
+		e = time.time()
+		print "KeywordExtractor.process_item:extracted keywords:", e - s 
 		return item
 
 	def buildWordIndex(self, words, item):
@@ -114,11 +122,14 @@ class KeywordExtractor(object):
 		For each word in current url's text,
 			add the url to the set of urls which contain that word
 		'''
+		s = time.time()
 		url_id = self.r.get("%s:%s" % (self.URL_TO_ID, item['url']))
 		for word in words:
 			word = self.clean(word)
 			self.r.sadd("%s:%s" % (self.WORD_IN, word), url_id)
 			self.r.sadd(self.WORD_SET, word)
+		e = time.time()
+		print "KeywordExtractor.buildWordIndex:built word index for", len(words), "words:", e - s
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
@@ -127,13 +138,16 @@ class KeywordExtractor(object):
 
 class PageClassifier(object):
 	def __init__(self):
-		self.w = WebClassifier()
+		self.w = WebClassifier("../")
 		self.w.loadClassifier()
 
 	def process_item(self, item, spider):
+		s = time.time()
 		result = self.w.test([item['keywords']])
 		item['proba'] = result['predict_proba']
 		item['predict'] = result['predict']
+		e = time.time()
+		print "PageClassifier.process_item:classify page:", e - s
 		return item
 
 class DataWriter(object):
@@ -160,10 +174,13 @@ class DataWriter(object):
 		}
 
 	def process_item(self, item, spider):
+		s = time.time()
 		self.writeURL(item)
 		self.writeKeywords(item)
 		self.writeWebMatrix(item)
 		self.writeClasses(item)
+		e = time.time()
+		print "DataWriter.process_item:write all files:", e - s
 		return item
 
 	def writeURL(self, item):
