@@ -1,0 +1,497 @@
+DuplicatesFilter.buildURLIndex:processed 34 links:0.010961
+DuplicatesFilter.process_item:processed new url: 0.011482
+TextExtractor.process_item: extracted textual content:3.921290
+KeywordExtractor.buildWordIndex:built word index for 71 words:0.014433
+KeywordExtractor.process_item:extracted keywords:4.182020
+DataWriter.process_item:write all files:0.003390
+DuplicatesFilter.buildURLIndex:processed 91 links:0.058138
+DuplicatesFilter.process_item:processed new url: 0.058428
+TextExtractor.process_item: extracted textual content:2.641342
+KeywordExtractor.buildWordIndex:built word index for 99 words:0.041923
+KeywordExtractor.process_item:extracted keywords:0.181687
+DataWriter.process_item:write all files:0.006859
+DuplicatesFilter.process_item:found duplicate: 0.000174
+DuplicatesFilter.process_item:found duplicate: 0.000208
+DuplicatesFilter.process_item:found duplicate: 0.000206
+DuplicatesFilter.process_item:found duplicate: 0.000230
+DuplicatesFilter.process_item:found duplicate: 0.000228
+DuplicatesFilter.process_item:found duplicate: 0.000219
+DuplicatesFilter.process_item:found duplicate: 0.000215
+DuplicatesFilter.process_item:found duplicate: 0.000204
+DuplicatesFilter.process_item:found duplicate: 0.000242
+DuplicatesFilter.process_item:found duplicate: 0.000196
+DuplicatesFilter.process_item:found duplicate: 0.000216
+DuplicatesFilter.process_item:found duplicate: 0.000259
+DuplicatesFilter.process_item:found duplicate: 0.000246
+DuplicatesFilter.process_item:found duplicate: 0.000239
+DuplicatesFilter.process_item:found duplicate: 0.000221
+DuplicatesFilter.process_item:found duplicate: 0.000448
+DuplicatesFilter.process_item:found duplicate: 0.000212
+DuplicatesFilter.process_item:found duplicate: 0.000189
+DuplicatesFilter.process_item:found duplicate: 0.000192
+DuplicatesFilter.process_item:found duplicate: 0.000209
+DuplicatesFilter.buildURLIndex:processed 70 links:0.009334
+DuplicatesFilter.process_item:processed new url: 0.009746
+TextExtractor.process_item: extracted textual content:13.408414
+KeywordExtractor.buildWordIndex:built word index for 31 words:0.013345
+KeywordExtractor.process_item:extracted keywords:0.061694
+DataWriter.process_item:write all files:0.005283
+DuplicatesFilter.buildURLIndex:processed 62 links:0.015617
+DuplicatesFilter.process_item:processed new url: 0.015979
+TextExtractor.process_item: extracted textual content:0.260605
+KeywordExtractor.buildWordIndex:built word index for 62 words:0.011837
+KeywordExtractor.process_item:extracted keywords:0.094943
+DataWriter.process_item:write all files:0.006630
+DuplicatesFilter.process_item:found duplicate: 0.000197
+DuplicatesFilter.buildURLIndex:processed 76 links:0.028971
+DuplicatesFilter.process_item:processed new url: 0.029227
+TextExtractor.process_item: extracted textual content:13.602235
+KeywordExtractor.buildWordIndex:built word index for 57 words:0.012124
+KeywordExtractor.process_item:extracted keywords:0.088852
+DataWriter.process_item:write all files:0.008022
+DuplicatesFilter.process_item:found duplicate: 0.000219
+DuplicatesFilter.buildURLIndex:processed 0 links:0.000309
+DuplicatesFilter.process_item:processed new url: 0.000463
+DuplicatesFilter.buildURLIndex:processed 21 links:0.008413
+DuplicatesFilter.process_item:processed new url: 0.008678
+TextExtractor.process_item: extracted textual content:1.121477
+KeywordExtractor.buildWordIndex:built word index for 367 words:0.137608
+KeywordExtractor.process_item:extracted keywords:0.634703
+DataWriter.process_item:write all files:0.002279
+DuplicatesFilter.buildURLIndex:processed 49 links:0.024556
+DuplicatesFilter.process_item:processed new url: 0.024813
+TextExtractor.process_item: extracted textual content:7.760643
+KeywordExtractor.buildWordIndex:built word index for 2205 words:0.351639
+KeywordExtractor.process_item:extracted keywords:3.302015
+DataWriter.process_item:write all files:0.005483
+DuplicatesFilter.process_item:found duplicate: 0.000222
+DuplicatesFilter.buildURLIndex:processed 85 links:0.045722
+DuplicatesFilter.process_item:processed new url: 0.046003
+TextExtractor.process_item: extracted textual content:0.582257
+KeywordExtractor.buildWordIndex:built word index for 38 words:0.008367
+KeywordExtractor.process_item:extracted keywords:0.056638
+DataWriter.process_item:write all files:0.009102
+DuplicatesFilter.buildURLIndex:processed 77 links:0.029240
+DuplicatesFilter.process_item:processed new url: 0.029478
+TextExtractor.process_item: extracted textual content:0.856919
+KeywordExtractor.buildWordIndex:built word index for 68 words:0.015608
+KeywordExtractor.process_item:extracted keywords:0.108008
+DuplicatesFilter.buildURLIndex:processed 72 links:0.028210
+DuplicatesFilter.process_item:processed new url: 0.028465
+TextExtractor.process_item: extracted textual content:0.635955
+KeywordExtractor.buildWordIndex:built word index for 129 words:0.025095
+KeywordExtractor.process_item:extracted keywords:0.195569
+DataWriter.process_item:write all files:0.005495
+DuplicatesFilter.buildURLIndex:processed 7 links:0.002473
+DuplicatesFilter.process_item:processed new url: 0.002675
+TextExtractor.process_item: extracted textual content:0.041136
+KeywordExtractor.buildWordIndex:built word index for 35 words:0.005686
+KeywordExtractor.process_item:extracted keywords:0.052518
+DataWriter.process_item:write all files:0.001227
+DuplicatesFilter.buildURLIndex:processed 7 links:0.001544
+DuplicatesFilter.process_item:processed new url: 0.001701
+TextExtractor.process_item: extracted textual content:0.040500
+KeywordExtractor.buildWordIndex:built word index for 35 words:0.005614
+KeywordExtractor.process_item:extracted keywords:0.051973
+DataWriter.process_item:write all files:0.001233
+DuplicatesFilter.buildURLIndex:processed 7 links:0.001200
+DuplicatesFilter.process_item:processed new url: 0.001382
+TextExtractor.process_item: extracted textual content:0.040762
+KeywordExtractor.buildWordIndex:built word index for 35 words:0.005768
+KeywordExtractor.process_item:extracted keywords:0.051463
+DataWriter.process_item:write all files:0.001157
+DuplicatesFilter.buildURLIndex:processed 7 links:0.001249
+DuplicatesFilter.process_item:processed new url: 0.001429
+TextExtractor.process_item: extracted textual content:0.040281
+KeywordExtractor.buildWordIndex:built word index for 35 words:0.005805
+KeywordExtractor.process_item:extracted keywords:0.051451
+DataWriter.process_item:write all files:0.001206
+DuplicatesFilter.buildURLIndex:processed 8 links:0.002515
+DuplicatesFilter.process_item:processed new url: 0.002765
+TextExtractor.process_item: extracted textual content:0.329653
+KeywordExtractor.buildWordIndex:built word index for 524 words:0.096339
+KeywordExtractor.process_item:extracted keywords:0.774459
+DataWriter.process_item:write all files:0.001423
+DuplicatesFilter.buildURLIndex:processed 44 links:0.010468
+DuplicatesFilter.process_item:processed new url: 0.010632
+TextExtractor.process_item: extracted textual content:1.940367
+KeywordExtractor.buildWordIndex:built word index for 37 words:0.013079
+KeywordExtractor.process_item:extracted keywords:0.063572
+DataWriter.process_item:write all files:0.003552
+DuplicatesFilter.buildURLIndex:processed 29 links:0.007278
+DuplicatesFilter.process_item:processed new url: 0.007520
+TextExtractor.process_item: extracted textual content:0.042181
+KeywordExtractor.buildWordIndex:built word index for 59 words:0.008145
+KeywordExtractor.process_item:extracted keywords:0.085016
+DataWriter.process_item:write all files:0.002685
+DuplicatesFilter.buildURLIndex:processed 13 links:0.002428
+DuplicatesFilter.process_item:processed new url: 0.002556
+TextExtractor.process_item: extracted textual content:0.065144
+KeywordExtractor.buildWordIndex:built word index for 143 words:0.026859
+KeywordExtractor.process_item:extracted keywords:0.213260
+DataWriter.process_item:write all files:0.003669
+DuplicatesFilter.process_item:found duplicate: 0.000364
+DuplicatesFilter.process_item:found duplicate: 0.000345
+DuplicatesFilter.process_item:found duplicate: 0.000236
+DuplicatesFilter.process_item:found duplicate: 0.000187
+DuplicatesFilter.process_item:found duplicate: 0.000180
+DuplicatesFilter.process_item:found duplicate: 0.000324
+DuplicatesFilter.process_item:found duplicate: 0.000304
+DuplicatesFilter.process_item:found duplicate: 0.000202
+DuplicatesFilter.process_item:found duplicate: 0.000354
+DuplicatesFilter.process_item:found duplicate: 0.000375
+DuplicatesFilter.buildURLIndex:processed 56 links:0.016528
+DuplicatesFilter.process_item:processed new url: 0.016909
+TextExtractor.process_item: extracted textual content:0.873190
+KeywordExtractor.buildWordIndex:built word index for 49 words:0.018121
+KeywordExtractor.process_item:extracted keywords:0.089448
+DataWriter.process_item:write all files:0.006111
+DuplicatesFilter.buildURLIndex:processed 49 links:0.012292
+DuplicatesFilter.process_item:processed new url: 0.012534
+TextExtractor.process_item: extracted textual content:0.085293
+KeywordExtractor.buildWordIndex:built word index for 5 words:0.001056
+KeywordExtractor.process_item:extracted keywords:0.007534
+DataWriter.process_item:write all files:0.003915
+DuplicatesFilter.buildURLIndex:processed 16 links:0.004327
+DuplicatesFilter.process_item:processed new url: 0.004459
+TextExtractor.process_item: extracted textual content:0.056207
+KeywordExtractor.buildWordIndex:built word index for 18 words:0.003982
+KeywordExtractor.process_item:extracted keywords:0.028864
+DataWriter.process_item:write all files:0.001851
+DuplicatesFilter.process_item:found duplicate: 0.000198
+DuplicatesFilter.buildURLIndex:processed 4 links:0.001734
+DuplicatesFilter.process_item:processed new url: 0.001976
+TextExtractor.process_item: extracted textual content:0.015388
+KeywordExtractor.buildWordIndex:built word index for 26 words:0.004391
+KeywordExtractor.process_item:extracted keywords:0.039212
+DataWriter.process_item:write all files:0.000735
+DuplicatesFilter.buildURLIndex:processed 4 links:0.001057
+DuplicatesFilter.process_item:processed new url: 0.001238
+TextExtractor.process_item: extracted textual content:0.016253
+KeywordExtractor.buildWordIndex:built word index for 36 words:0.005129
+KeywordExtractor.process_item:extracted keywords:0.052288
+DataWriter.process_item:write all files:0.000841
+DuplicatesFilter.buildURLIndex:processed 15 links:0.003346
+DuplicatesFilter.process_item:processed new url: 0.003542
+TextExtractor.process_item: extracted textual content:1.871959
+KeywordExtractor.buildWordIndex:built word index for 363 words:0.101743
+KeywordExtractor.process_item:extracted keywords:0.584060
+DataWriter.process_item:write all files:0.001800
+DuplicatesFilter.buildURLIndex:processed 36 links:0.009190
+DuplicatesFilter.process_item:processed new url: 0.009439
+TextExtractor.process_item: extracted textual content:1.497129
+KeywordExtractor.buildWordIndex:built word index for 45 words:0.020607
+KeywordExtractor.process_item:extracted keywords:0.089141
+DuplicatesFilter.process_item:found duplicate: 0.000519
+DuplicatesFilter.process_item:found duplicate: 0.000377
+DuplicatesFilter.process_item:found duplicate: 0.000374
+DuplicatesFilter.process_item:found duplicate: 0.000391
+DuplicatesFilter.buildURLIndex:processed 101 links:0.026669
+DuplicatesFilter.process_item:processed new url: 0.027072
+TextExtractor.process_item: extracted textual content:0.323560
+KeywordExtractor.buildWordIndex:built word index for 98 words:0.018365
+KeywordExtractor.process_item:extracted keywords:0.147095
+DataWriter.process_item:write all files:0.008612
+DuplicatesFilter.process_item:found duplicate: 0.000123
+DuplicatesFilter.process_item:found duplicate: 0.000197
+DuplicatesFilter.process_item:found duplicate: 0.000175
+DuplicatesFilter.buildURLIndex:processed 2 links:0.000410
+DuplicatesFilter.process_item:processed new url: 0.000673
+TextExtractor.process_item: extracted textual content:0.022732
+KeywordExtractor.buildWordIndex:built word index for 26 words:0.005994
+KeywordExtractor.process_item:extracted keywords:0.041415
+DataWriter.process_item:write all files:0.000581
+DuplicatesFilter.buildURLIndex:processed 91 links:0.023750
+DuplicatesFilter.process_item:processed new url: 0.023998
+TextExtractor.process_item: extracted textual content:1.040558
+KeywordExtractor.buildWordIndex:built word index for 31 words:0.007161
+KeywordExtractor.process_item:extracted keywords:0.048870
+DataWriter.process_item:write all files:0.009551
+DuplicatesFilter.buildURLIndex:processed 7 links:0.001500
+DuplicatesFilter.process_item:processed new url: 0.001738
+TextExtractor.process_item: extracted textual content:0.042804
+KeywordExtractor.buildWordIndex:built word index for 35 words:0.007822
+KeywordExtractor.process_item:extracted keywords:0.061066
+DataWriter.process_item:write all files:0.001508
+DuplicatesFilter.buildURLIndex:processed 39 links:0.013532
+DuplicatesFilter.process_item:processed new url: 0.013822
+TextExtractor.process_item: extracted textual content:0.617437
+KeywordExtractor.buildWordIndex:built word index for 97 words:0.041184
+KeywordExtractor.process_item:extracted keywords:0.179523
+DataWriter.process_item:write all files:0.004398
+DuplicatesFilter.process_item:found duplicate: 0.000242
+
+
+
+
+DuplicatesFilter.buildURLIndex:processed 91 links:0.033972
+DuplicatesFilter.process_item:processed new url: 0.034373
+TextExtractor.process_item: extracted textual content:3.549894
+KeywordExtractor.buildWordIndex:built word index for 99 words:0.023682
+KeywordExtractor.process_item:extracted keywords:4.281107
+DataWriter.process_item:write all files:0.009910
+DuplicatesFilter.process_item:found duplicate: 0.000398
+DuplicatesFilter.process_item:found duplicate: 0.000347
+DuplicatesFilter.process_item:found duplicate: 0.000341
+DuplicatesFilter.process_item:found duplicate: 0.000376
+DuplicatesFilter.process_item:found duplicate: 0.000331
+DuplicatesFilter.process_item:found duplicate: 0.000344
+DuplicatesFilter.process_item:found duplicate: 0.000409
+DuplicatesFilter.process_item:found duplicate: 0.000317
+DuplicatesFilter.process_item:found duplicate: 0.000293
+DuplicatesFilter.process_item:found duplicate: 0.000315
+DuplicatesFilter.process_item:found duplicate: 0.000214
+DuplicatesFilter.process_item:found duplicate: 0.000178
+DuplicatesFilter.process_item:found duplicate: 0.000230
+DuplicatesFilter.process_item:found duplicate: 0.000218
+DuplicatesFilter.process_item:found duplicate: 0.000208
+DuplicatesFilter.process_item:found duplicate: 0.000261
+DuplicatesFilter.process_item:found duplicate: 0.000220
+DuplicatesFilter.process_item:found duplicate: 0.000232
+DuplicatesFilter.buildURLIndex:processed 76 links:0.010443
+DuplicatesFilter.process_item:processed new url: 0.010803
+TextExtractor.process_item: extracted textual content:8.555268
+KeywordExtractor.buildWordIndex:built word index for 494 words:0.075489
+KeywordExtractor.process_item:extracted keywords:0.717303
+DataWriter.process_item:write all files:0.006129
+DuplicatesFilter.buildURLIndex:processed 62 links:0.015044
+DuplicatesFilter.process_item:processed new url: 0.015302
+TextExtractor.process_item: extracted textual content:0.265838
+KeywordExtractor.buildWordIndex:built word index for 62 words:0.009824
+KeywordExtractor.process_item:extracted keywords:0.093805
+DataWriter.process_item:write all files:0.004577
+DuplicatesFilter.process_item:found duplicate: 0.000208
+DuplicatesFilter.process_item:found duplicate: 0.000231
+DuplicatesFilter.buildURLIndex:processed 0 links:0.000736
+DuplicatesFilter.process_item:processed new url: 0.000938
+DuplicatesFilter.buildURLIndex:processed 76 links:0.021313
+DuplicatesFilter.process_item:processed new url: 0.021695
+TextExtractor.process_item: extracted textual content:52.464644
+KeywordExtractor.buildWordIndex:built word index for 57 words:0.019600
+KeywordExtractor.process_item:extracted keywords:0.103445
+DataWriter.process_item:write all files:0.005630
+DuplicatesFilter.buildURLIndex:processed 67 links:0.005987
+DuplicatesFilter.process_item:processed new url: 0.006234
+TextExtractor.process_item: extracted textual content:9.775540
+KeywordExtractor.buildWordIndex:built word index for 33 words:0.008289
+KeywordExtractor.process_item:extracted keywords:0.053628
+DataWriter.process_item:write all files:0.004599
+DuplicatesFilter.process_item:found duplicate: 0.000208
+DuplicatesFilter.buildURLIndex:processed 31 links:0.007626
+DuplicatesFilter.process_item:processed new url: 0.007851
+TextExtractor.process_item: extracted textual content:0.025630
+KeywordExtractor.buildWordIndex:built word index for 11 words:0.002732
+KeywordExtractor.process_item:extracted keywords:0.016797
+DataWriter.process_item:write all files:0.002529
+DuplicatesFilter.process_item:found duplicate: 0.000113
+DuplicatesFilter.buildURLIndex:processed 257 links:0.062522
+DuplicatesFilter.process_item:processed new url: 0.062811
+TextExtractor.process_item: extracted textual content:83.084506
+KeywordExtractor.buildWordIndex:built word index for 875 words:0.199908
+KeywordExtractor.process_item:extracted keywords:1.381358
+DataWriter.process_item:write all files:0.017738
+DuplicatesFilter.buildURLIndex:processed 35 links:0.006248
+DuplicatesFilter.process_item:processed new url: 0.006459
+TextExtractor.process_item: extracted textual content:0.087494
+KeywordExtractor.buildWordIndex:built word index for 10 words:0.001928
+KeywordExtractor.process_item:extracted keywords:0.015566
+DataWriter.process_item:write all files:0.002889
+DuplicatesFilter.process_item:found duplicate: 0.000248
+DuplicatesFilter.process_item:found duplicate: 0.000247
+DuplicatesFilter.process_item:found duplicate: 0.000241
+DuplicatesFilter.buildURLIndex:processed 8 links:0.002758
+DuplicatesFilter.process_item:processed new url: 0.003012
+TextExtractor.process_item: extracted textual content:0.333887
+KeywordExtractor.buildWordIndex:built word index for 524 words:0.064887
+KeywordExtractor.process_item:extracted keywords:0.751131
+DataWriter.process_item:write all files:0.001258
+DuplicatesFilter.process_item:found duplicate: 0.000254
+DuplicatesFilter.buildURLIndex:processed 52 links:0.031184
+DuplicatesFilter.process_item:processed new url: 0.031605
+TextExtractor.process_item: extracted textual content:0.095824
+KeywordExtractor.buildWordIndex:built word index for 645 words:0.087297
+KeywordExtractor.process_item:extracted keywords:0.902063
+DataWriter.process_item:write all files:0.004441
+DuplicatesFilter.buildURLIndex:processed 21 links:0.005487
+DuplicatesFilter.process_item:processed new url: 0.005755
+TextExtractor.process_item: extracted textual content:0.051520
+KeywordExtractor.buildWordIndex:built word index for 22 words:0.003364
+KeywordExtractor.process_item:extracted keywords:0.032042
+DataWriter.process_item:write all files:0.002474
+DuplicatesFilter.buildURLIndex:processed 2 links:0.000876
+DuplicatesFilter.process_item:processed new url: 0.001043
+TextExtractor.process_item: extracted textual content:0.026634
+KeywordExtractor.buildWordIndex:built word index for 10 words:0.002242
+KeywordExtractor.process_item:extracted keywords:0.015494
+DataWriter.process_item:write all files:0.000464
+DuplicatesFilter.process_item:found duplicate: 0.000205
+DuplicatesFilter.process_item:found duplicate: 0.000214
+DuplicatesFilter.process_item:found duplicate: 0.000222
+DuplicatesFilter.process_item:found duplicate: 0.000230
+DuplicatesFilter.process_item:found duplicate: 0.000219
+
+
+
+
+DuplicatesFilter.buildURLIndex:processed 91 links:0.023500
+DuplicatesFilter.process_item:processed new url: 0.024068
+TextExtractor.process_item: extracted textual content:2.086571
+KeywordExtractor.buildWordIndex:built word index for 99 words:0.038612
+KeywordExtractor.process_item:extracted keywords:4.505030
+DataWriter.process_item:write all files:0.006569
+DuplicatesFilter.process_item:found duplicate: 0.000168
+DuplicatesFilter.process_item:found duplicate: 0.000221
+DuplicatesFilter.process_item:found duplicate: 0.000225
+DuplicatesFilter.process_item:found duplicate: 0.000213
+DuplicatesFilter.process_item:found duplicate: 0.000223
+DuplicatesFilter.process_item:found duplicate: 0.000201
+DuplicatesFilter.process_item:found duplicate: 0.000216
+DuplicatesFilter.process_item:found duplicate: 0.000159
+DuplicatesFilter.process_item:found duplicate: 0.000238
+DuplicatesFilter.process_item:found duplicate: 0.000190
+DuplicatesFilter.process_item:found duplicate: 0.000245
+DuplicatesFilter.process_item:found duplicate: 0.000333
+DuplicatesFilter.process_item:found duplicate: 0.000245
+DuplicatesFilter.process_item:found duplicate: 0.000220
+DuplicatesFilter.process_item:found duplicate: 0.000227
+DuplicatesFilter.process_item:found duplicate: 0.000395
+DuplicatesFilter.process_item:found duplicate: 0.000388
+DuplicatesFilter.buildURLIndex:processed 164 links:0.032551
+DuplicatesFilter.process_item:processed new url: 0.032950
+TextExtractor.process_item: extracted textual content:12.856999
+KeywordExtractor.buildWordIndex:built word index for 771 words:0.127835
+KeywordExtractor.process_item:extracted keywords:1.090576
+DataWriter.process_item:write all files:0.011586
+DuplicatesFilter.process_item:found duplicate: 0.000240
+DuplicatesFilter.process_item:found duplicate: 0.000237
+DuplicatesFilter.buildURLIndex:processed 206 links:0.052363
+DuplicatesFilter.process_item:processed new url: 0.052643
+TextExtractor.process_item: extracted textual content:11.033909
+KeywordExtractor.buildWordIndex:built word index for 31 words:0.015105
+KeywordExtractor.process_item:extracted keywords:0.062781
+DataWriter.process_item:write all files:0.014838
+DuplicatesFilter.buildURLIndex:processed 257 links:0.039976
+DuplicatesFilter.process_item:processed new url: 0.040252
+TextExtractor.process_item: extracted textual content:2.224941
+KeywordExtractor.buildWordIndex:built word index for 1122 words:0.161770
+KeywordExtractor.process_item:extracted keywords:1.645397
+DataWriter.process_item:write all files:0.017435
+DuplicatesFilter.buildURLIndex:processed 265 links:0.027464
+DuplicatesFilter.process_item:processed new url: 0.027767
+TextExtractor.process_item: extracted textual content:2.472984
+KeywordExtractor.buildWordIndex:built word index for 991 words:0.194460
+KeywordExtractor.process_item:extracted keywords:1.486874
+DataWriter.process_item:write all files:0.029673
+DuplicatesFilter.buildURLIndex:processed 257 links:0.021641
+DuplicatesFilter.process_item:processed new url: 0.021917
+TextExtractor.process_item: extracted textual content:44.611260
+KeywordExtractor.buildWordIndex:built word index for 874 words:0.227969
+KeywordExtractor.process_item:extracted keywords:1.425185
+DataWriter.process_item:write all files:0.033115
+DuplicatesFilter.buildURLIndex:processed 76 links:0.019489
+DuplicatesFilter.process_item:processed new url: 0.019743
+TextExtractor.process_item: extracted textual content:49.169807
+KeywordExtractor.buildWordIndex:built word index for 57 words:0.010675
+KeywordExtractor.process_item:extracted keywords:0.086293
+DataWriter.process_item:write all files:0.005714
+DuplicatesFilter.process_item:found duplicate: 0.000249
+DuplicatesFilter.buildURLIndex:processed 21 links:0.005935
+DuplicatesFilter.process_item:processed new url: 0.006158
+TextExtractor.process_item: extracted textual content:0.108048
+KeywordExtractor.buildWordIndex:built word index for 73 words:0.010319
+KeywordExtractor.process_item:extracted keywords:0.101694
+DataWriter.process_item:write all files:0.002074
+DuplicatesFilter.buildURLIndex:processed 21 links:0.006191
+DuplicatesFilter.process_item:processed new url: 0.006570
+TextExtractor.process_item: extracted textual content:10.500782
+KeywordExtractor.buildWordIndex:built word index for 56 words:0.010342
+KeywordExtractor.process_item:extracted keywords:0.081339
+DataWriter.process_item:write all files:0.002318
+DuplicatesFilter.process_item:found duplicate: 0.000227
+DuplicatesFilter.buildURLIndex:processed 0 links:0.000663
+DuplicatesFilter.process_item:processed new url: 0.001039
+TextExtractor.process_item: extracted textual content:0.000007
+KeywordExtractor.buildWordIndex:built word index for 2 words:0.001050
+KeywordExtractor.process_item:extracted keywords:0.003785
+DataWriter.process_item:write all files:0.000166
+DuplicatesFilter.buildURLIndex:processed 8 links:0.002220
+DuplicatesFilter.process_item:processed new url: 0.002464
+TextExtractor.process_item: extracted textual content:0.346152
+KeywordExtractor.buildWordIndex:built word index for 524 words:0.178091
+KeywordExtractor.process_item:extracted keywords:0.869063
+DataWriter.process_item:write all files:0.001661
+DuplicatesFilter.process_item:found duplicate: 0.000254
+DuplicatesFilter.buildURLIndex:processed 107 links:0.026364
+DuplicatesFilter.process_item:processed new url: 0.026633
+TextExtractor.process_item: extracted textual content:1.947493
+KeywordExtractor.buildWordIndex:built word index for 72 words:0.014904
+KeywordExtractor.process_item:extracted keywords:0.110390
+DataWriter.process_item:write all files:0.011218
+DuplicatesFilter.process_item:found duplicate: 0.000236
+DuplicatesFilter.process_item:found duplicate: 0.000197
+DuplicatesFilter.process_item:found duplicate: 0.000201
+DuplicatesFilter.process_item:found duplicate: 0.000198
+DuplicatesFilter.process_item:found duplicate: 0.000197
+DuplicatesFilter.process_item:found duplicate: 0.000283
+DuplicatesFilter.buildURLIndex:processed 62 links:0.023613
+DuplicatesFilter.process_item:processed new url: 0.023932
+TextExtractor.process_item: extracted textual content:0.260195
+KeywordExtractor.buildWordIndex:built word index for 62 words:0.012280
+KeywordExtractor.process_item:extracted keywords:0.092175
+DataWriter.process_item:write all files:0.006502
+DuplicatesFilter.buildURLIndex:processed 16 links:0.006182
+DuplicatesFilter.process_item:processed new url: 0.006533
+TextExtractor.process_item: extracted textual content:0.095115
+KeywordExtractor.buildWordIndex:built word index for 283 words:0.054228
+KeywordExtractor.process_item:extracted keywords:0.414946
+DataWriter.process_item:write all files:0.002058
+DuplicatesFilter.buildURLIndex:processed 4 links:0.001905
+DuplicatesFilter.process_item:processed new url: 0.002131
+TextExtractor.process_item: extracted textual content:0.015953
+KeywordExtractor.buildWordIndex:built word index for 26 words:0.005249
+KeywordExtractor.process_item:extracted keywords:0.038582
+DataWriter.process_item:write all files:0.000725
+DuplicatesFilter.buildURLIndex:processed 34 links:0.006768
+DuplicatesFilter.process_item:processed new url: 0.006961
+TextExtractor.process_item: extracted textual content:0.176553
+KeywordExtractor.buildWordIndex:built word index for 821 words:0.104307
+KeywordExtractor.process_item:extracted keywords:1.126286
+DataWriter.process_item:write all files:0.003060
+DuplicatesFilter.buildURLIndex:processed 22 links:0.001947
+DuplicatesFilter.process_item:processed new url: 0.002101
+TextExtractor.process_item: extracted textual content:0.049361
+KeywordExtractor.buildWordIndex:built word index for 22 words:0.004005
+KeywordExtractor.process_item:extracted keywords:0.031855
+DataWriter.process_item:write all files:0.001739
+DuplicatesFilter.process_item:found duplicate: 0.000300
+DuplicatesFilter.buildURLIndex:processed 30 links:0.005009
+DuplicatesFilter.process_item:processed new url: 0.005306
+TextExtractor.process_item: extracted textual content:0.164094
+KeywordExtractor.buildWordIndex:built word index for 697 words:0.096848
+KeywordExtractor.process_item:extracted keywords:0.975086
+DataWriter.process_item:write all files:0.002581
+DuplicatesFilter.buildURLIndex:processed 29 links:0.003330
+DuplicatesFilter.process_item:processed new url: 0.003528
+TextExtractor.process_item: extracted textual content:0.143578
+KeywordExtractor.buildWordIndex:built word index for 206 words:0.026345
+KeywordExtractor.process_item:extracted keywords:0.284163
+DataWriter.process_item:write all files:0.002797
+DuplicatesFilter.buildURLIndex:processed 36 links:0.007889
+DuplicatesFilter.process_item:processed new url: 0.008097
+TextExtractor.process_item: extracted textual content:0.583047
+KeywordExtractor.buildWordIndex:built word index for 153 words:0.024097
+KeywordExtractor.process_item:extracted keywords:0.297381
+DataWriter.process_item:write all files:0.005221
+DuplicatesFilter.buildURLIndex:processed 48 links:0.017920
+DuplicatesFilter.process_item:processed new url: 0.018171
+TextExtractor.process_item: extracted textual content:7.723055
+KeywordExtractor.buildWordIndex:built word index for 828 words:0.115351
+KeywordExtractor.process_item:extracted keywords:1.153230
+DataWriter.process_item:write all files:0.007171
+DuplicatesFilter.process_item:found duplicate: 0.000201
+DuplicatesFilter.process_item:found duplicate: 0.000237
+DuplicatesFilter.process_item:found duplicate: 0.000386
+DuplicatesFilter.process_item:found duplicate: 0.000238
+DuplicatesFilter.process_item:found duplicate: 0.000232
+DuplicatesFilter.process_item:found duplicate: 0.000239
+DuplicatesFilter.process_item:found duplicate: 0.000239
