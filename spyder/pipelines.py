@@ -63,12 +63,14 @@ class TextExtractor(object):
 	def process_item(self, item, spider):
 		print item['url']
 
-		#item['extracted_text'] = self.g.extract(raw_html = item['raw_html']).cleaned_text
-		temp = self.g.extract(raw_html = item['raw_html']).cleaned_text
-		try:
-			temp = unicode(temp, encoding = "UTF-8")
-		except: pass
-		item['extracted_text'] = unidecode(temp)
+		if not item['raw_html']:
+			item['extracted_text'] = ""
+		else:
+			temp = self.g.extract(raw_html = item['raw_html']).cleaned_text
+			try:
+				temp = unicode(temp, encoding = "UTF-8")
+			except: pass
+			item['extracted_text'] = unidecode(temp)
 		return item
 
 
@@ -88,10 +90,10 @@ class KeywordExtractor(object):
 	def process_item(self, item, spider):
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = nltk.wordpunct_tokenize(text)
-		self.buildWordIndex(words, item)
+		self.buildWordIndex([w for w in words if w.isalnum()], item)
 
 		pos = nltk.pos_tag(words)
-		item['keywords'] = list(set([x[0] for x in pos if x[1] in ['NN', 'NNS', 'NNPS', 'NNP']]))
+		item['keywords'] = list(set([self.clean(x[0]) for x in pos if x[1] in ['NN', 'NNS', 'NNPS', 'NNP']]))
 
 		'''
 		*** For extracting noun phrases ***

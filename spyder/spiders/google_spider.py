@@ -23,15 +23,13 @@ class GoogleSpider(CrawlSpider):
 		sel = Selector(response)
 		item = WebItem()
 		name = sel.xpath("//title/text()").extract()
-		if name:
-			item['title'] = self.clean(name[0])
-		else:
-			item['title'] = ""
+		if name: item['title'] = self.clean(name[0])
+		else: item['title'] = ""
 		item['url'] = response.url
 		item['raw_html'] = response.body
 		rel_links = sel.xpath('//a/@href').extract()
 		meta = sel.xpath('//meta[@name="description"]/@content').extract()
-		if meta: meta = meta[0]
+		if meta: meta = self.clean(meta[0])
 		else: meta = ""
 		item['meta_description'] = meta
 		abs_links = []
@@ -43,13 +41,13 @@ class GoogleSpider(CrawlSpider):
 	def clean(self, s):
 		s = self.encode_str(s)
 		s = s.strip()
-		s = s.replace('\n', ' ').replace('|', '-').replace('\t', ' ')
+		s = s.replace('\n', ' ').replace('|', ' - ').replace('\t', ' ').replace('(', ' ').replace(')', ' ')
 		return s
 
 	def encode_str(self, s):
-		if type(s) == unicode:
-			#return u''.join(s).encode('utf-8').strip()
-			return unidecode(s)
-		else:
-			return unidecode(s.decode("utf-8", "ignore"))
-
+		temp = s
+		try:
+			temp = unicode(temp, encoding = "UTF-8"
+		except:
+			pass
+		return unidecode(temp)
