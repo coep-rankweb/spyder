@@ -9,6 +9,8 @@ import nltk
 from unidecode import unidecode
 import time
 
+t = open("data/time.txt", "w")
+
 class DuplicatesFilter(object):
 	'''
 	Filters duplicate urls
@@ -28,13 +30,13 @@ class DuplicatesFilter(object):
 		if self.r.get("%s:%s" % (self.URL_TO_ID, item['url'])):
 			#duplicate
 			e = time.time()
-			print "DuplicatesFilter.process_item:found duplicate: ", e - s
+			t.write("DuplicatesFilter.process_item:found duplicate: %f\n" %  (e - s))
 			raise DropItem
 		else:
 			#process new item
 			self.buildURLIndex(item)
 		e = time.time()
-		print "DuplicatesFilter.process_item:processed new url: ", e - s
+		t.write("DuplicatesFilter.process_item:processed new url: %f\n" % (e - s))
 		return item
 
 	def buildURLIndex(self, item):
@@ -56,7 +58,7 @@ class DuplicatesFilter(object):
 				self.r.set("%s:%d" % (self.ID_TO_URL, self.count), link)
 				self.count += 1
 		e = time.time()
-		print "DuplicatesFilter.buildURLIndex:processed", len(set(item['link_set'])), "links:", e - s
+		t.write("DuplicatesFilter.buildURLIndex:processed %d links:%f\n" % (len(set(item['link_set'])), (e - s)))
 
 
 class TextExtractor(object):
@@ -67,13 +69,15 @@ class TextExtractor(object):
 	def process_item(self, item, spider):
 		print item['url']
 		s = time.time()
-		temp = self.g.extract(raw_html = item['raw_html']).cleaned_text
-		try:
-			temp = unicode(temp, encoding = "UTF-8")
-		except: pass
-		item['extracted_text'] = unidecode(temp)
+		if not item['raw_html']: item['extracted_text'] = ""
+		else:
+			temp = self.g.extract(raw_html = item['raw_html']).cleaned_text
+			try:
+				temp = unicode(temp, encoding = "UTF-8")
+			except: pass
+			item['extracted_text'] = unidecode(temp)
 		e = time.time()
-		print "TextExtractor.process_item: extracted textual content:", e - s
+		t.write("TextExtractor.process_item: extracted textual content:%f\n" % (e - s))
 		return item
 
 
@@ -82,8 +86,6 @@ class KeywordExtractor(object):
 	Extracts keywords from title, extracted_text, meta_description
 	'''
 	def __init__(self):
-		#grammar = "NP: {<JJ>*<NN.*>+|<NN.*>+<IN><NN.*>+}"
-		#self.p = nltk.RegexpParser(grammar)
 		self.r = redis.Redis()
 		self.URL_TO_ID = "URL2ID"
 		self.WORD_SET = "WORD_SET"
@@ -92,28 +94,15 @@ class KeywordExtractor(object):
 
 	def process_item(self, item, spider):
 		s = time.time()
+
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = nltk.wordpunct_tokenize(text)
 		self.buildWordIndex(words, item)
-
 		pos = nltk.pos_tag(words)
 		item['keywords'] = list(set([self.clean(x[0]) for x in pos if x[1] in ['NN', 'NNS', 'NNPS', 'NNP']]))
 
-		'''
-		*** For extracting noun phrases ***
-
-		t = self.p.parse(pos)
-		subtrees = t.subtrees()
-		item['keywords'] = set()
-		for i in list(subtrees)[1:]:
-			st = ""
-			for j in i.leaves():
-				st += j[0] + " "
-			item['keywords'].add(st.strip())
-
-		'''
 		e = time.time()
-		print "KeywordExtractor.process_item:extracted keywords:", e - s 
+		t.write("KeywordExtractor.process_item:extracted keywords:%f\n" % (e - s)) 
 		return item
 
 	def buildWordIndex(self, words, item):
@@ -129,7 +118,7 @@ class KeywordExtractor(object):
 			self.r.sadd("%s:%s" % (self.WORD_IN, word), url_id)
 			self.r.sadd(self.WORD_SET, word)
 		e = time.time()
-		print "KeywordExtractor.buildWordIndex:built word index for", len(words), "words:", e - s
+		t.write("KeywordExtractor.buildWordIndex:built word index for %d words:%f\n" % (len(words), (e - s)))
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
@@ -138,16 +127,21 @@ class KeywordExtractor(object):
 
 class PageClassifier(object):
 	def __init__(self):
-		self.w = WebClassifier("../")
-		self.w.loadClassifier()
+		#self.w = WebClassifier("../")
+		#self.w.loadClassifier()
+		pass
 
 	def process_item(self, item, spider):
+		item['proba'] = [0.2] * 15
+		item['predict'] = [1]
+		return item
+
 		s = time.time()
 		result = self.w.test([item['keywords']])
 		item['proba'] = result['predict_proba']
 		item['predict'] = result['predict']
 		e = time.time()
-		print "PageClassifier.process_item:classify page:", e - s
+		t.write("PageClassifier.process_item:classify page:%f\n" % (e - s))
 		return item
 
 class DataWriter(object):
@@ -180,7 +174,7 @@ class DataWriter(object):
 		self.writeWebMatrix(item)
 		self.writeClasses(item)
 		e = time.time()
-		print "DataWriter.process_item:write all files:", e - s
+		t.write("DataWriter.process_item:write all files:%f\n" % (e - s))
 		return item
 
 	def writeURL(self, item):

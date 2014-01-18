@@ -2,6 +2,7 @@ from scrapy import log
 from urlparse import urlparse
 from scrapy.exceptions import IgnoreRequest
 import redis
+import sys
 
 class RequestsLimiter(object):
 	def __init__(self):
@@ -12,6 +13,10 @@ class RequestsLimiter(object):
 		self.DOMAIN_SET = "DOMAINSET"
 
 	def process_request(self, request, spider):
+		self.r.incr("count", 1)
+		if int(self.r.get("count")) > 100:
+			print "==================== END ======================="
+			sys.exit(0)
 		domain = urlparse(request.url).hostname
 		if int(self.r.get(self.DOMAIN + domain) or 0) < self.LIMIT:
 			self.r.sadd(self.DOMAIN_SET, domain)

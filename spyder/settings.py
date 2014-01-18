@@ -13,12 +13,12 @@ NEWSPIDER_MODULE = 'spyder.spiders'
 #CONCURRENT_REQUESTS = 100
 
 LOG_LEVEL = 'INFO'
-LOG_FILE = 'log.txt'
+LOG_FILE = 'data/log.txt'
 
 DEPTH_LEVEL = 3
 
 DOWNLOADER_MIDDLEWARES = {
-    'spyder.middlewares.RequestsLimiter': 543,
+    'spyder.middleware.RequestsLimiter': 543,
 }
 
 ITEM_PIPELINES = {
