@@ -5,9 +5,9 @@
 
 from scrapy import log
 import os, sys
-sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath('../'))
 from webclassifier import WebClassifier
-import redis
+from datastore import Datastore
 from scrapy.exceptions import DropItem
 from goose import Goose
 import nltk
@@ -20,7 +20,7 @@ class DuplicatesFilter(object):
 	Sets url -> id and id -> url in redis
 	'''
 	def __init__(self):
-		self.r = redis.Redis()
+		self.r = Datastore()
 		self.count = 1
 		#self.r.flushdb()
 		self.URL_TO_ID = "URL2ID"
@@ -66,7 +66,10 @@ class TextExtractor(object):
 		if not item['raw_html']:
 			item['extracted_text'] = ""
 		else:
-			temp = self.g.extract(raw_html = item['raw_html']).cleaned_text
+			extract = self.g.extract(raw_html = item['raw_html'])
+			if extract.meta_lang != 'en':
+				raise DropItem
+			temp = extract.cleaned_text
 			try:
 				temp = unicode(temp, encoding = "UTF-8")
 			except: pass
@@ -81,7 +84,7 @@ class KeywordExtractor(object):
 	def __init__(self):
 		#grammar = "NP: {<JJ>*<NN.*>+|<NN.*>+<IN><NN.*>+}"
 		#self.p = nltk.RegexpParser(grammar)
-		self.r = redis.Redis()
+		self.r = Datastore()
 		self.URL_TO_ID = "URL2ID"
 		self.WORD_SET = "WORD_SET"
 		self.WORD_IN = "WORD_IN"
@@ -93,7 +96,7 @@ class KeywordExtractor(object):
 		self.buildWordIndex([w for w in words if w.isalnum()], item)
 
 		pos = nltk.pos_tag(words)
-		item['keywords'] = list(set([self.clean(x[0]) for x in pos if x[1] in ['NN', 'NNS', 'NNPS', 'NNP']]))
+		item['keywords'] = list(set([self.clean(x[0]) for x in pos if x[1] in ['NN', 'NNS', 'NNPS', 'NNP'] and x[0].isalnum()]))
 
 		'''
 		*** For extracting noun phrases ***
@@ -140,25 +143,33 @@ class PageClassifier(object):
 
 class DataWriter(object):
 	def __init__(self):
+		# 0 means unbuffered
 		self.f_url = open("data/url.txt", "w")
 		self.f_key = open("data/keywords.txt", "w")
 		self.f_mat = open("data/matrix.mtx", "w")
 		self.f_cla = open("data/classes.txt", "w")
-		self.r = redis.Redis()
+		self.r = Datastore()
 
 		self.URL_TO_ID = "URL2ID"
 		self.URL_SET = "URL_SET"
 		self.ID_TO_URL = "ID2URL"
 
 		self.classes = {
-			1: 'geography',
-			2: 'science',
-			3: 'society',
-			4: 'history',
-			5: 'finance',
-			6: 'tech',
-			7: 'sports',
-			8: 'arts'
+			1:"News",
+			2:"Shopping",
+			3:"Sports",
+			4:"Recreation",
+			5:"Reference",
+			6:"Arts",
+			7:"Home",
+			8:"Business",
+			9:"Science",
+			10:"Games",
+			11:"World",
+			12:"Regional",
+			13:"Health",
+			14:"Computers",
+			15:"Society"
 		}
 
 	def process_item(self, item, spider):

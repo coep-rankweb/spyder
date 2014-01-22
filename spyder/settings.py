@@ -10,9 +10,9 @@ BOT_NAME = 'spyder'
 
 SPIDER_MODULES = ['spyder.spiders']
 NEWSPIDER_MODULE = 'spyder.spiders'
-#CONCURRENT_REQUESTS = 100
+CONCURRENT_REQUESTS = 100
 
-LOG_LEVEL = 'INFO'
+#LOG_LEVEL = 'ERROR'
 LOG_FILE = 'data/log.txt'
 
 DEPTH_LEVEL = 3
@@ -34,4 +34,5 @@ ITEM_PIPELINES = {
 #SCHEDULER_MEMORY_QUEUE = 'scrapy.squeue.FifoMemoryQueue'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'spyder (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36'
+ROBOTSTXT_OBEY = True
