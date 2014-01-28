@@ -1,3 +1,5 @@
+reset:
+	python reset.py
 crawl:
 	rm -f data/*
 	rm -f *.[mt]x[t] *.pyc

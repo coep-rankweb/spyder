@@ -66,10 +66,11 @@ class TextExtractor(object):
 		if not item['raw_html']:
 			item['extracted_text'] = ""
 		else:
+			temp = nltk.clean_html(item['raw_html'])
 			extract = self.g.extract(raw_html = item['raw_html'])
 			if extract.meta_lang != 'en':
 				raise DropItem
-			temp = extract.cleaned_text
+			#temp = extract.cleaned_text
 			try:
 				temp = unicode(temp, encoding = "UTF-8")
 			except: pass
@@ -89,6 +90,7 @@ class KeywordExtractor(object):
 		self.WORD_SET = "WORD_SET"
 		self.WORD_IN = "WORD_IN"
 		self.stemmer = nltk.stem.PorterStemmer()
+		self.stopwords = set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search'])
 
 	def process_item(self, item, spider):
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
@@ -96,7 +98,9 @@ class KeywordExtractor(object):
 		self.buildWordIndex([w for w in words if w.isalnum()], item)
 
 		pos = nltk.pos_tag(words)
-		item['keywords'] = list(set([self.clean(x[0]) for x in pos if x[1] in ['NN', 'NNS', 'NNPS', 'NNP'] and x[0].isalnum()]))
+		item['parts_of_speech'] = [(self.clean(x[0]), x[1]) for x in pos]
+		possibles = set([x[0] for x in item['parts_of_speech'] if x[1] in ['NN', 'NNS', 'NNPS', 'NNP'] and x[0].isalnum() and len(x[0]) > 1])
+		item['keywords'] = list(possibles - self.stopwords)
 
 		'''
 		*** For extracting noun phrases ***
@@ -128,6 +132,32 @@ class KeywordExtractor(object):
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
 
+
+class Markov(object):
+	def __init__(self):
+		self.r = Datastore()
+		self.DIGRAM = "DIGRAM"
+		self.OCCUR = "OCCUR"
+		self.DIGRAM_SET = "DIGRAM_SET"
+		self.OCCUR_SET = "OCCUR_SET"
+
+	def process_item(self, item, spider):
+		pos_iter = iter(item['parts_of_speech'])
+		next_elem = pos_iter.next()
+		allowed = ['JJ', 'NN', 'NNP', 'NNPS', 'NNS']
+		while True:
+			try:
+				cur_elem, next_elem = next_elem, pos_iter.next()
+				if cur_elem[1] in allowed and next_elem[1] in allowed:
+					if cur_elem[0].isalnum() and next_elem[0].isalnum():
+						self.r.incr("%s:%s:%s" % (self.DIGRAM, cur_elem[0], next_elem[0]), 1)
+						self.r.incr("%s:%s" % (self.OCCUR, cur_elem[0]), 1)
+
+						self.r.sadd(self.DIGRAM_SET, "%s:%s" % (cur_elem[0], next_elem[0]))
+						self.r.sadd(self.OCCUR_SET, "%s" % cur_elem[0])
+			except StopIteration:
+				break
+		return item
 
 
 class PageClassifier(object):
@@ -165,11 +195,10 @@ class DataWriter(object):
 			8:"Business",
 			9:"Science",
 			10:"Games",
-			11:"World",
-			12:"Regional",
-			13:"Health",
-			14:"Computers",
-			15:"Society"
+			11:"Regional",
+			12:"Health",
+			13:"Computers",
+			14:"Society"
 		}
 
 	def process_item(self, item, spider):
@@ -199,4 +228,4 @@ class DataWriter(object):
 
 	def writeClasses(self, item):
 		self.f_cla.write("%s:%s\n" % (item['title'], self.classes[item['predict'][0]]))
-		self.f_cla.write("%s\n" % str(item['proba']))
+		#self.f_cla.write("%s\n" % str(item['proba']))

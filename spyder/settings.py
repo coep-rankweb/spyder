@@ -25,8 +25,9 @@ ITEM_PIPELINES = {
 	'spyder.pipelines.DuplicatesFilter': 1,
 	'spyder.pipelines.TextExtractor': 2,
 	'spyder.pipelines.KeywordExtractor': 3,
-	'spyder.pipelines.PageClassifier': 4,
-	'spyder.pipelines.DataWriter': 5
+	'spyder.pipelines.Markov': 4,
+	'spyder.pipelines.PageClassifier': 5,
+	'spyder.pipelines.DataWriter': 6
 }
 
 #DEPTH_PRIORITY = 1

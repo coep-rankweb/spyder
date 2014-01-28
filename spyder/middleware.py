@@ -24,7 +24,7 @@ class RequestsLimiter(object):
 			raise IgnoreRequest
 
 	def process_response(self, request, response, spider):
-		if response.headers['Content-Type'] not in ['text/html', 'text/plain']:
+		if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
 			log.msg(vars(request), level=log.WARNING)
 			raise IgnoreRequest
 		return response
