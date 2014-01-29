@@ -21,11 +21,12 @@ class DuplicatesFilter(object):
 	'''
 	def __init__(self):
 		self.r = Datastore()
-		self.count = 1
 		#self.r.flushdb()
 		self.URL_TO_ID = "URL2ID"
 		self.URL_SET = "URL_SET"
 		self.ID_TO_URL = "ID2URL"
+		self.URL_CTR = "URL_CTR"
+		self.r.set(self.URL_CTR, -1)
 
 	def process_item(self, item, spider):
 		if self.r.get("%s:%s" % (self.URL_TO_ID, item['url'])):
@@ -43,16 +44,16 @@ class DuplicatesFilter(object):
 		'''
 		#url has not been processed before
 		self.r.sadd(self.URL_SET, item['url'])
-		self.r.set("%s:%d" % (self.ID_TO_URL, self.count), item['url'])
-		self.r.set("%s:%s" % (self.URL_TO_ID, item['url']), self.count)
-		self.count += 1
+		url_id = self.r.incr(self.URL_CTR, 1)
+		self.r.set("%s:%d" % (self.ID_TO_URL, url_id), item['url'])
+		self.r.set("%s:%s" % (self.URL_TO_ID, item['url']), url_id)
 
 		for link in set(item['link_set']):
 			if not self.r.get("%s:%s" % (self.URL_TO_ID, link)):
+				new_url_id = self.incr(self.URL_CTR, 1)
 				self.r.sadd(self.URL_SET, link)
-				self.r.set("%s:%s" % (self.URL_TO_ID, link), self.count)
-				self.r.set("%s:%d" % (self.ID_TO_URL, self.count), link)
-				self.count += 1
+				self.r.set("%s:%s" % (self.URL_TO_ID, link), new_url_id)
+				self.r.set("%s:%d" % (self.ID_TO_URL, new_url_id), link)
 
 
 class TextExtractor(object):
@@ -83,51 +84,41 @@ class KeywordExtractor(object):
 	Extracts keywords from title, extracted_text, meta_description
 	'''
 	def __init__(self):
-		#grammar = "NP: {<JJ>*<NN.*>+|<NN.*>+<IN><NN.*>+}"
-		#self.p = nltk.RegexpParser(grammar)
 		self.r = Datastore()
 		self.URL_TO_ID = "URL2ID"
 		self.WORD_SET = "WORD_SET"
+		self.WORD_TO_ID = "WORD2ID"
 		self.WORD_IN = "WORD_IN"
+		self.WORD_CTR = "WORD_CTR"
+		self.r.set(self.WORD_CTR, -1)
 		self.stemmer = nltk.stem.PorterStemmer()
-		self.stopwords = set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search'])
+		self.stopwords = set.union(set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search']), nltk.corpus.stopwords.words('english'))
 
 	def process_item(self, item, spider):
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = nltk.wordpunct_tokenize(text)
-		self.buildWordIndex([w for w in words if w.isalnum()], item)
+		cleaned_words = set([x[0] for x in words]) - self.stopwords
+		cleaned_words = [self.clean(w) for w in cleaned_words if w.isalnum() and len(w) > 1]
+		item['words'] = cleaned_words
+		self.buildWordIndex(item)
 
-		pos = nltk.pos_tag(words)
-		item['parts_of_speech'] = [(self.clean(x[0]), x[1]) for x in pos]
-		possibles = set([x[0] for x in item['parts_of_speech'] if x[1] in ['NN', 'NNS', 'NNPS', 'NNP'] and x[0].isalnum() and len(x[0]) > 1])
-		item['keywords'] = list(possibles - self.stopwords)
+		#pos = nltk.pos_tag(words)
+		#item['parts_of_speech'] = [(self.clean(x[0]), x[1]) for x in pos]
 
-		'''
-		*** For extracting noun phrases ***
-
-		t = self.p.parse(pos)
-		subtrees = t.subtrees()
-		item['keywords'] = set()
-		for i in list(subtrees)[1:]:
-			st = ""
-			for j in i.leaves():
-				st += j[0] + " "
-			item['keywords'].add(st.strip())
-
-		'''
 		return item
 
-	def buildWordIndex(self, words, item):
+	def buildWordIndex(self, item):
 		'''
 		Get current url id
 		For each word in current url's text,
 			add the url to the set of urls which contain that word
 		'''
 		url_id = self.r.get("%s:%s" % (self.URL_TO_ID, item['url']))
-		for word in words:
-			word = self.clean(word)
+		for word in item['words']:
 			self.r.sadd("%s:%s" % (self.WORD_IN, word), url_id)
 			self.r.sadd(self.WORD_SET, word)
+			ctr = self.r.incr(self.WORD_CTR, 1)
+			self.r.set("%s:%s" % (self.WORD_TO_ID, word), ctr)
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
@@ -144,7 +135,6 @@ class Markov(object):
 	def process_item(self, item, spider):
 		pos_iter = iter(item['parts_of_speech'])
 		next_elem = pos_iter.next()
-		allowed = ['JJ', 'NN', 'NNP', 'NNPS', 'NNS']
 		while True:
 			try:
 				cur_elem, next_elem = next_elem, pos_iter.next()
@@ -166,7 +156,7 @@ class PageClassifier(object):
 		self.w.loadClassifier()
 
 	def process_item(self, item, spider):
-		result = self.w.test([item['keywords']])
+		result = self.w.test([item['words']])
 		item['proba'] = result['predict_proba']
 		item['predict'] = result['predict']
 		return item
@@ -184,22 +174,9 @@ class DataWriter(object):
 		self.URL_SET = "URL_SET"
 		self.ID_TO_URL = "ID2URL"
 
-		self.classes = {
-			1:"News",
-			2:"Shopping",
-			3:"Sports",
-			4:"Recreation",
-			5:"Reference",
-			6:"Arts",
-			7:"Home",
-			8:"Business",
-			9:"Science",
-			10:"Games",
-			11:"Regional",
-			12:"Health",
-			13:"Computers",
-			14:"Society"
-		}
+		l = enumerate(os.listdir("/home/nvdia/kernel_panic/core/config_data/classes_odp"))
+		l = [(x[0] + 1, x[1]) for x in l]
+		self.classes = dict(l)
 
 	def process_item(self, item, spider):
 		self.writeURL(item)
@@ -212,7 +189,7 @@ class DataWriter(object):
 		self.f_url.write(item['url'] + "\n")
 
 	def writeKeywords(self, item):
-		for k in item['keywords']:
+		for k in item['words']:
 			self.f_key.write("%s," % k)
 		self.f_key.write("\n")
 

@@ -11,7 +11,7 @@ class WebItem(Item):
 	extracted_text = Field()
 	meta_description = Field()
 	link_set = Field()
-	keywords = Field()
+	words = Field()
 	parts_of_speech = Field()
 	raw_html = Field()
 	proba = Field()	#probability distribution of classes
