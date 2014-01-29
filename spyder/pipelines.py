@@ -124,15 +124,21 @@ class KeywordExtractor(object):
 		return self.stemmer.stem(s.lower())
 
 
-class Markov(object):
+class Stat(object):
 	def __init__(self):
 		self.r = Datastore()
 		self.DIGRAM = "DIGRAM"
 		self.OCCUR = "OCCUR"
 		self.DIGRAM_SET = "DIGRAM_SET"
 		self.OCCUR_SET = "OCCUR_SET"
+		self.DF = "DF"
 
 	def process_item(self, item, spider):
+		item = self.markov(item)
+		item = self.df(item)
+		return item
+
+	def markov(self, item):
 		pos_iter = iter(item['parts_of_speech'])
 		next_elem = pos_iter.next()
 		while True:
@@ -147,6 +153,12 @@ class Markov(object):
 						self.r.sadd(self.OCCUR_SET, "%s" % cur_elem[0])
 			except StopIteration:
 				break
+		return item
+
+
+	def df(self, item):
+		for k in item['words']:
+			self.r.incr("%s:%s" % (self.DF, k), 1)
 		return item
 
 
