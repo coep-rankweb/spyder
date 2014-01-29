@@ -17,7 +17,6 @@ DIGRAM_SET = "DIGRAM_SET"
 DIGRAM = "DIGRAM"
 OCCUR_SET = "OCCUR_SET"
 OCCUR = "OCCUR"
-DF_SET = "DF_SET"
 DF = "DF"
 
 
@@ -41,7 +40,7 @@ for digram in r.smembers(DIGRAM_SET):
 for occur in r.smembers(OCCUR_SET):
 	r.delete("%s:%s" % (OCCUR, occur))
 
-for d in r.smembers(DF_SET):
+for d in r.smembers(WORD_SET):
 	r.delete("%s:%s" % (DF, d))
 
 r.delete(DOMAIN_SET)
@@ -49,4 +48,3 @@ r.delete(URL_SET)
 r.delete(WORD_SET)
 r.delete(DIGRAM_SET)
 r.delete(OCCUR_SET)
-r.delete(DF_SET)

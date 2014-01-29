@@ -95,6 +95,7 @@ class KeywordExtractor(object):
 	def process_item(self, item, spider):
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = nltk.wordpunct_tokenize(text)
+		item['words'] = [w for w in words if w.isalnum()]
 		self.buildWordIndex([w for w in words if w.isalnum()], item)
 
 		pos = nltk.pos_tag(words)
@@ -133,7 +134,7 @@ class KeywordExtractor(object):
 		return self.stemmer.stem(s.lower())
 
 
-class Markov(object):
+class Stat(object):
 	def __init__(self):
 		self.r = Datastore()
 		self.DIGRAM = "DIGRAM"
@@ -141,7 +142,6 @@ class Markov(object):
 		self.DIGRAM_SET = "DIGRAM_SET"
 		self.OCCUR_SET = "OCCUR_SET"
 		self.DF = "DF"
-		self.DF_SET = "DF_SET"
 
 	def process_item(self, item, spider):
 		item = self.markov(item)
@@ -168,8 +168,7 @@ class Markov(object):
 
 
 	def df(self, item):
-		for k in item['keywords']:
-			self.r.sadd(self.DF_SET, k)
+		for k in item['words']:
 			self.r.incr("%s:%s" % (self.DF, k), 1)
 		return item
 
