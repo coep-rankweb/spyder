@@ -140,8 +140,15 @@ class Markov(object):
 		self.OCCUR = "OCCUR"
 		self.DIGRAM_SET = "DIGRAM_SET"
 		self.OCCUR_SET = "OCCUR_SET"
+		self.DF = "DF"
+		self.DF_SET = "DF_SET"
 
 	def process_item(self, item, spider):
+		item = self.markov(item)
+		item = self.df(item)
+		return item
+
+	def markov(self, item):
 		pos_iter = iter(item['parts_of_speech'])
 		next_elem = pos_iter.next()
 		allowed = ['JJ', 'NN', 'NNP', 'NNPS', 'NNS']
@@ -157,6 +164,13 @@ class Markov(object):
 						self.r.sadd(self.OCCUR_SET, "%s" % cur_elem[0])
 			except StopIteration:
 				break
+		return item
+
+
+	def df(self, item):
+		for k in item['keywords']:
+			self.r.sadd(self.DF_SET, k)
+			self.r.incr("%s:%s" % (self.DF, k), 1)
 		return item
 
 
