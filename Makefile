@@ -1,7 +1,7 @@
 FLAGS =
 
 reset:
-	python reset.py
+	python scripts/reset.py
 
 crawl:
 	rm -f data/*
@@ -15,8 +15,8 @@ off:
 	python -c "import sys; sys.path.append('../'); from datastore import Datastore; r = Datastore(); r.set('POWER_SWITCH', 'OFF')"
 
 process:
-	python remap.py
-	python indexbuilder.py
+	python scripts/remap.py
+	python scripts/indexbuilder.py
 
 rank:
-	python rankmap.py
+	python scripts/rankmap.py
