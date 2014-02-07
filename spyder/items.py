@@ -16,3 +16,4 @@ class WebItem(Item):
 	raw_html = Field()
 	proba = Field()	#probability distribution of classes
 	predict = Field()	#predicted class
+	shutdown = Field()

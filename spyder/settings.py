@@ -12,12 +12,15 @@ SPIDER_MODULES = ['spyder.spiders']
 NEWSPIDER_MODULE = 'spyder.spiders'
 CONCURRENT_REQUESTS = 100
 
-#LOG_LEVEL = 'ERROR'
+LOG_LEVEL = 'DEBUG'
 LOG_FILE = 'data/log.txt'
 
 DEPTH_LEVEL = 3
 
 DOWNLOADER_MIDDLEWARES = {
+	'spyder.middleware.ProxyMiddleware': 100,
+	'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 112,
+	'scrapy.contrib.downloadermiddleware.robotstxt.RobotsTxtMiddleware':541,
     'spyder.middleware.RequestsLimiter': 543,
 }
 

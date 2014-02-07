@@ -8,6 +8,7 @@ sys.path.append("../")
 from datastore import Datastore
 r = Datastore()
 
+'''
 URL_TO_ID = "URL2ID"
 URL_SET = "URL_SET"
 ID_TO_URL = "ID2URL"
@@ -48,3 +49,8 @@ r.delete(URL_SET)
 r.delete(WORD_SET)
 r.delete(DIGRAM_SET)
 r.delete(OCCUR_SET)
+'''
+
+for i in r.keys():
+	if i.startswith("FEAT"): pass
+	else: r.delete(i)

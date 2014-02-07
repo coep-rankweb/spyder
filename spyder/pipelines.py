@@ -1,34 +1,34 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-
 from scrapy import log
 import os, sys
 sys.path.append(os.path.abspath('../'))
 from webclassifier import WebClassifier
 from datastore import Datastore
 from scrapy.exceptions import DropItem
-from goose import Goose
 import nltk
 from unidecode import unidecode
+from timer import timeit
+
 
 class DuplicatesFilter(object):
 	'''
 	Filters duplicate urls
 	Assigns each url a unique id
 	Sets url -> id and id -> url in redis
+	Indexes inlinks and outlinks
 	'''
 	def __init__(self):
 		self.r = Datastore()
-		#self.r.flushdb()
 		self.URL_TO_ID = "URL2ID"
-		self.URL_SET = "URL_SET"
 		self.ID_TO_URL = "ID2URL"
+		self.URL_SET = "URL_SET"
 		self.URL_CTR = "URL_CTR"
 		self.r.set(self.URL_CTR, -1)
 
+	@timeit("DuplicatesFilter")
 	def process_item(self, item, spider):
+		if item['shutdown']:
+			return item
+
 		if self.r.get("%s:%s" % (self.URL_TO_ID, item['url'])):
 			#duplicate
 			raise DropItem
@@ -43,35 +43,34 @@ class DuplicatesFilter(object):
 		Each link's url is assigned an ID and vice versa
 		'''
 		#url has not been processed before
-		self.r.sadd(self.URL_SET, item['url'])
 		url_id = self.r.incr(self.URL_CTR, 1)
+		self.r.sadd(self.URL_SET, url_id)
 		self.r.set("%s:%d" % (self.ID_TO_URL, url_id), item['url'])
 		self.r.set("%s:%s" % (self.URL_TO_ID, item['url']), url_id)
 
 		for link in set(item['link_set']):
 			if not self.r.get("%s:%s" % (self.URL_TO_ID, link)):
-				new_url_id = self.incr(self.URL_CTR, 1)
-				self.r.sadd(self.URL_SET, link)
+				new_url_id = self.r.incr(self.URL_CTR, 1)
+				self.r.sadd(self.URL_SET, new_url_id)
 				self.r.set("%s:%s" % (self.URL_TO_ID, link), new_url_id)
 				self.r.set("%s:%d" % (self.ID_TO_URL, new_url_id), link)
-
 
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
 	def __init__(self):
-		self.g = Goose()
+		pass
 
+	@timeit("TextExtractor")
 	def process_item(self, item, spider):
+		if item['shutdown']:
+			return item
+
 		print item['url']
 
 		if not item['raw_html']:
 			item['extracted_text'] = ""
 		else:
 			temp = nltk.clean_html(item['raw_html'])
-			extract = self.g.extract(raw_html = item['raw_html'])
-			if extract.meta_lang != 'en':
-				raise DropItem
-			#temp = extract.cleaned_text
 			try:
 				temp = unicode(temp, encoding = "UTF-8")
 			except: pass
@@ -94,11 +93,15 @@ class KeywordExtractor(object):
 		self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set.union(set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search']), nltk.corpus.stopwords.words('english'))
 
+	@timeit("KeywordExtractor")
 	def process_item(self, item, spider):
+		if item['shutdown']:
+			return item
+
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = nltk.wordpunct_tokenize(text)
-		cleaned_words = set([x[0] for x in words]) - self.stopwords
-		cleaned_words = [self.clean(w) for w in cleaned_words if w.isalnum() and len(w) > 1]
+		cleaned_words = set(words) - self.stopwords
+		cleaned_words = [self.clean(w) for w in cleaned_words if w.isalnum() and len(w) > 1 and not w.isdigit()]
 		item['words'] = cleaned_words
 		self.buildWordIndex(item)
 
@@ -114,11 +117,14 @@ class KeywordExtractor(object):
 			add the url to the set of urls which contain that word
 		'''
 		url_id = self.r.get("%s:%s" % (self.URL_TO_ID, item['url']))
+		word_id = ""
 		for word in item['words']:
-			self.r.sadd("%s:%s" % (self.WORD_IN, word), url_id)
-			self.r.sadd(self.WORD_SET, word)
-			ctr = self.r.incr(self.WORD_CTR, 1)
-			self.r.set("%s:%s" % (self.WORD_TO_ID, word), ctr)
+			if self.r.sadd(self.WORD_SET, word):
+				word_id = str(self.r.incr(self.WORD_CTR, 1))
+				self.r.set("%s:%s" % (self.WORD_TO_ID, word), word_id)
+			else:
+				word_id = self.r.get("%s:%s" % (self.WORD_TO_ID, word))
+			self.r.sadd("%s:%s" % (self.WORD_IN, word_id), url_id)
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
@@ -133,7 +139,11 @@ class Stat(object):
 		self.OCCUR_SET = "OCCUR_SET"
 		self.DF = "DF"
 
+	@timeit("Stat")
 	def process_item(self, item, spider):
+		if item['shutdown']:
+			return item
+
 		item = self.markov(item)
 		item = self.df(item)
 		return item
@@ -167,7 +177,11 @@ class PageClassifier(object):
 		self.w = WebClassifier()
 		self.w.loadClassifier()
 
+	@timeit("PageClassifier")
 	def process_item(self, item, spider):
+		if item['shutdown']:
+			return item
+
 		result = self.w.test([item['words']])
 		item['proba'] = result['predict_proba']
 		item['predict'] = result['predict']
@@ -175,7 +189,6 @@ class PageClassifier(object):
 
 class DataWriter(object):
 	def __init__(self):
-		# 0 means unbuffered
 		self.f_url = open("data/url.txt", "w")
 		self.f_key = open("data/keywords.txt", "w")
 		self.f_mat = open("data/matrix.mtx", "w")
@@ -183,18 +196,28 @@ class DataWriter(object):
 		self.r = Datastore()
 
 		self.URL_TO_ID = "URL2ID"
-		self.URL_SET = "URL_SET"
 		self.ID_TO_URL = "ID2URL"
+		self.PROCESSED_CTR = "PROCESSED_CTR"
 
 		l = enumerate(os.listdir("/home/nvdia/kernel_panic/core/config_data/classes_odp"))
 		l = [(x[0] + 1, x[1]) for x in l]
 		self.classes = dict(l)
 
+	@timeit("DataWriter")
 	def process_item(self, item, spider):
+		if item['shutdown']:
+			self.f_url.close()
+			self.f_key.close()
+			self.f_mat.close()
+			self.f_cla.close()
+			self.r.set("POWER_SWITCH", "KILL")
+			return item
+
 		self.writeURL(item)
 		self.writeKeywords(item)
 		self.writeWebMatrix(item)
 		self.writeClasses(item)
+		self.r.incr(self.PROCESSED_CTR, 1)
 		return item
 
 	def writeURL(self, item):
