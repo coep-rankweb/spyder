@@ -49,8 +49,10 @@ r.delete(URL_SET)
 r.delete(WORD_SET)
 r.delete(DIGRAM_SET)
 r.delete(OCCUR_SET)
-'''
 
 for i in r.keys():
 	if i.startswith("FEAT"): pass
 	else: r.delete(i)
+'''
+
+r.flushdb()

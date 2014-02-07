@@ -17,3 +17,6 @@ off:
 process:
 	python remap.py
 	python indexbuilder.py
+
+rank:
+	python rankmap.py
