@@ -1,1 +1,0 @@
-instead of taking noun keywords from the webpage, we now take all words from the page and index them. we stored all url and word id generators (*_CTR) in redis.
