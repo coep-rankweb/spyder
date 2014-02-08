@@ -16,11 +16,6 @@ class GoogleSpider(CrawlSpider):
 	name = "google"
 	allowed_domains = []
 
-	#start_urls = ["http://www.nobelprize.org/nobel_prizes/physics/laureates/1921/einstein-bio.html"]
-	#start_urls = ["http://en.wikipedia.org/wiki/Bill_Gates"]
-	#start_urls = ["http://www.moreintelligentlife.com/"]
-	#start_urls = ["http://espn.go.com/", "http://www.moreintelligentlife.com/", "http://www.nature.com/browse/index.html", "http://edition.cnn.com/", "http://www.si.edu/", "http://www.amazon.com/"]
-	#start_urls = ["http://www.food.com/", "http://frenchfood.about.com/", "http://www.stanford.edu/", "http://www.paleoportal.org/"]
 	start_urls = ['http://www.foodnetwork.com/recipes/emeril-lagasse/cajun-jambalaya-recipe2.html', 'http://thebrowser.com/', 'http://www.popphoto.com/', 'http://www.technologyreview.com/', 'http://www.goldmansachs.com/index.html?view=desktop', 'http://www.nationalgeographic.com/', "http://www.nobelprize.org/nobel_prizes/physics/laureates/1921/einstein-bio.html"]
 
 	rules = (
@@ -29,7 +24,7 @@ class GoogleSpider(CrawlSpider):
 	r = Datastore()
 
 	def process(self, response):
-		status = self.r.get("POWER_SWITCH")
+		status = self.r.find_one(CRAWLER_DATA, {'spider': 'google'})['POWER_SWITCH']
 		item = WebItem()
 		if status == "KILL":
 			raise CloseSpider("shutdown")
@@ -57,7 +52,7 @@ class GoogleSpider(CrawlSpider):
 					link = urljoin(response.url, l)
 					if urlparse(link).scheme in ['http', 'https']:
 						abs_links.append(link)
-				item['link_set'] = abs_links
+				item['link_set'] = set(abs_links)
 
 				return item
 			except Exception:

@@ -5,30 +5,24 @@ from scrapy.selector import Selector
 import sys
 sys.path.append("../")
 from datastore import Datastore
+from defines import *
 import langid
 import base64
 
 class RequestsLimiter(object):
 	def __init__(self):
 		self.r = Datastore()
-		#self.r.flushdb()
-		self.DOMAIN = "DOMAIN"
-		self.LIMIT = 200
-		self.DOMAIN_SET = "DOMAIN_SET"
 
 	def process_request(self, request, spider):
 		domain = urlparse(request.url).hostname
-		if int(self.r.get(self.DOMAIN + ":" + domain) or 0) < self.LIMIT:
-			self.r.sadd(self.DOMAIN_SET, domain)
-			self.r.incr(self.DOMAIN + ":" + domain, 1)
-			return None
-		else:
-			log.msg(request.url, level=log.WARNING)
+		res = self.r.update(DOMAIN_DATA, {'domain': domain}, {"$inc": {"freq": 1}})
+		if res['freq'] > DOMAIN_LIMIT:
 			raise IgnoreRequest
+		else:
+			return None
 
 	def process_response(self, request, response, spider):
 		if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
-			log.msg(vars(request), level=log.WARNING)
 			raise IgnoreRequest
 
 		if langid.classify(response.body)[0] != 'en':
