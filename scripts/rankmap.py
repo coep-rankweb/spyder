@@ -1,7 +1,8 @@
-import redis
 import sys
+sys.path.append("../")
+from datastore import Datastore
 
-r = redis.Redis()
+r = Datastore.factory()
 
 DEFAULT = "../cusp/b_cpu"
 RANK = "RANK"

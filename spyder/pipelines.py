@@ -17,7 +17,7 @@ class DuplicatesFilter(object):
 	Indexes inlinks and outlinks
 	'''
 	def __init__(self):
-		self.r = Datastore()
+		self.r = Datastore.factory()
 		self.URL_TO_ID = "URL2ID"
 		self.ID_TO_URL = "ID2URL"
 		self.URL_SET = "URL_SET"
@@ -83,7 +83,7 @@ class KeywordExtractor(object):
 	Extracts keywords from title, extracted_text, meta_description
 	'''
 	def __init__(self):
-		self.r = Datastore()
+		self.r = Datastore.factory()
 		self.URL_TO_ID = "URL2ID"
 		self.WORD_SET = "WORD_SET"
 		self.WORD_TO_ID = "WORD2ID"
@@ -132,7 +132,7 @@ class KeywordExtractor(object):
 
 class Stat(object):
 	def __init__(self):
-		self.r = Datastore()
+		self.r = Datastore.factory()
 		self.DIGRAM = "DIGRAM"
 		self.OCCUR = "OCCUR"
 		self.DIGRAM_SET = "DIGRAM_SET"
@@ -193,7 +193,7 @@ class DataWriter(object):
 		self.f_key = open("data/keywords.txt", "w")
 		self.f_mat = open("data/matrix.mtx", "w")
 		self.f_cla = open("data/classes.txt", "w")
-		self.r = Datastore()
+		self.r = Datastore.factory()
 
 		self.URL_TO_ID = "URL2ID"
 		self.ID_TO_URL = "ID2URL"

@@ -2,7 +2,9 @@
 This program builds the document vectors and stores them in redis.
 '''
 
-import redis
+import sys
+sys.path.append("../")
+from datastore import Datastore
 import os
 from itertools import izip
 
@@ -16,7 +18,7 @@ URL2ID = "URL2ID"
 WORD2ID = "WORD2ID"
 
 
-r = redis.Redis ()
+r = Datastore.factory()
 
 furl = open (os.path.join(base, url_file))
 fkeyword = open (os.path.join(base, keyword_file))
