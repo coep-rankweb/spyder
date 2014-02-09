@@ -10,7 +10,7 @@ Stores its data into a mongodb database via the following collections:
           id: 24,
           url: "http://www.example.com",
           word_vec: [32, 16, 88],
-	  out_links: [1, 4, 77, 563]
+          out_links: [1, 4, 77, 563]
      }
 
 

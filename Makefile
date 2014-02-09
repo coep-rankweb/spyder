@@ -1,5 +1,6 @@
 FLAGS =
-
+clear:
+	make reset && make init && make on
 reset:
 	python -c\
 		'from datastore import Datastore;\
