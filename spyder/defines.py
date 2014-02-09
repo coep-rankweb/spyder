@@ -1,0 +1,9 @@
+#url data
+URL_TO_ID = "URL2ID"
+ID_TO_URL = "ID2URL"
+URL_SET = "URL_SET"
+
+#word data
+WORD_TO_ID = "WORD2ID"
+WORD_IN = "WORD_IN"
+WORD_SET = "WORD_SET"
