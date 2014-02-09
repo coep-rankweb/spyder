@@ -18,7 +18,6 @@ class RequestsLimiter(object):
 		domain = urlparse(request.url).hostname
 		self.r.update(DOMAIN_DATA, {'domain': domain}, {"$inc": {"freq": 1}})
 		res = self.r.find_one(DOMAIN_DATA, {'domain': domain})
-		print res
 		if res['freq'] > DOMAIN_LIMIT:
 			raise IgnoreRequest
 		else:

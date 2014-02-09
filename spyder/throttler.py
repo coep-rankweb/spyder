@@ -8,6 +8,7 @@ from datastore import Datastore
 def throttle(method):
 	def wrapper(class_obj, item, *args, **kwargs):
 		if item['shutdown']:
+			print ">>>>>>>>>>>>>>>>>>> shutdown item"
 			return item
 		return method(class_obj, item, *args, **kwargs)
 	return wrapper
@@ -15,7 +16,8 @@ def throttle(method):
 def final_throttle(method):
 	def wrapper(class_obj, item, *args, **kwargs):
 		if item['shutdown']:
-			Datastore().update(CRAWLER_DATA, {'spider': 'google'}, {'POWER_SWITCH': 'kill'})
+			print ">>>>>>>>>>>>>>>>> FINAL SHUTDOWN ITEM"
+			Datastore().update(CRAWLER_DATA, {'spider': 'google'}, {'POWER_SWITCH': 'KILL'})
 			return item
 		return method(class_obj, item, *args, **kwargs)
 	return wrapper
