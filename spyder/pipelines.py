@@ -6,8 +6,8 @@ from datastore import Datastore
 from scrapy.exceptions import DropItem
 import nltk
 from unidecode import unidecode
-from timer import timeit
-
+import itertools
+from throttler import throttle, final_throttle
 
 class DuplicatesFilter(object):
 	'''
@@ -18,18 +18,11 @@ class DuplicatesFilter(object):
 	'''
 	def __init__(self):
 		self.r = Datastore.factory()
-		self.URL_TO_ID = "URL2ID"
-		self.ID_TO_URL = "ID2URL"
-		self.URL_SET = "URL_SET"
-		self.URL_CTR = "URL_CTR"
-		self.r.set(self.URL_CTR, -1)
+		self.URL_CTR = itertools.count()
 
-	@timeit("DuplicatesFilter")
+	@throttle
 	def process_item(self, item, spider):
-		if item['shutdown']:
-			return item
-
-		if self.r.get("%s:%s" % (self.URL_TO_ID, item['url'])):
+		if self.r.get("%s:%s" % (URL_TO_ID, item['url'])):
 			#duplicate
 			raise DropItem
 		else:
@@ -43,28 +36,28 @@ class DuplicatesFilter(object):
 		Each link's url is assigned an ID and vice versa
 		'''
 		#url has not been processed before
-		url_id = self.r.incr(self.URL_CTR, 1)
-		self.r.sadd(self.URL_SET, url_id)
-		self.r.set("%s:%d" % (self.ID_TO_URL, url_id), item['url'])
-		self.r.set("%s:%s" % (self.URL_TO_ID, item['url']), url_id)
+		url_id = self.URL_CTR.next()
+		self.r.sadd(URL_SET, url_id)
+
+		# In mongodb, adding both indices is not required
+		# But to maintain consistency with redis
+		self.r.set("%s:%d" % (ID_TO_URL, url_id), item['url'])
+		self.r.set("%s:%s" % (URL_TO_ID, item['url']), url_id)
 
 		for link in set(item['link_set']):
-			if not self.r.get("%s:%s" % (self.URL_TO_ID, link)):
-				new_url_id = self.r.incr(self.URL_CTR, 1)
-				self.r.sadd(self.URL_SET, new_url_id)
-				self.r.set("%s:%s" % (self.URL_TO_ID, link), new_url_id)
-				self.r.set("%s:%d" % (self.ID_TO_URL, new_url_id), link)
+			if not self.r.get("%s:%s" % (URL_TO_ID, link)):
+				new_url_id = self.URL_CTR.next()
+				self.r.sadd(URL_SET, new_url_id)
+				self.r.set("%s:%s" % (URL_TO_ID, link), new_url_id)
+				self.r.set("%s:%d" % (ID_TO_URL, new_url_id), link)
 
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
 	def __init__(self):
 		pass
 
-	@timeit("TextExtractor")
+	@throttle
 	def process_item(self, item, spider):
-		if item['shutdown']:
-			return item
-
 		print item['url']
 
 		if not item['raw_html']:
@@ -84,20 +77,12 @@ class KeywordExtractor(object):
 	'''
 	def __init__(self):
 		self.r = Datastore.factory()
-		self.URL_TO_ID = "URL2ID"
-		self.WORD_SET = "WORD_SET"
-		self.WORD_TO_ID = "WORD2ID"
-		self.WORD_IN = "WORD_IN"
-		self.WORD_CTR = "WORD_CTR"
-		self.r.set(self.WORD_CTR, -1)
+		self.WORD_CTR = itertools.count()
 		self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set.union(set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search']), nltk.corpus.stopwords.words('english'))
 
-	@timeit("KeywordExtractor")
+	@final_throttle
 	def process_item(self, item, spider):
-		if item['shutdown']:
-			return item
-
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = nltk.wordpunct_tokenize(text)
 		cleaned_words = set(words) - self.stopwords
@@ -116,15 +101,15 @@ class KeywordExtractor(object):
 		For each word in current url's text,
 			add the url to the set of urls which contain that word
 		'''
-		url_id = self.r.get("%s:%s" % (self.URL_TO_ID, item['url']))
-		word_id = ""
+		url_id = int(self.r.get("%s:%s" % (URL_TO_ID, item['url'])))
 		for word in item['words']:
-			if self.r.sadd(self.WORD_SET, word):
-				word_id = str(self.r.incr(self.WORD_CTR, 1))
-				self.r.set("%s:%s" % (self.WORD_TO_ID, word), word_id)
+			if not self.r.get("%s:%s" % (WORD_TO_ID, word)):
+				self.r.sadd(URL_SET, word)
+				word_id = self.WORD_CTR.next()
+				self.r.set("%s:%d" % (WORD_TO_ID, word), word_id)
 			else:
-				word_id = self.r.get("%s:%s" % (self.WORD_TO_ID, word))
-			self.r.sadd("%s:%s" % (self.WORD_IN, word_id), url_id)
+				word_id = int(self.r.get("%s:%s" % (WORD_TO_ID, word)))
+			self.r.sadd("%s:%d" % (WORD_IN, word_id), url_id)
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())

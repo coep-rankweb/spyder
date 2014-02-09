@@ -29,8 +29,8 @@ ITEM_PIPELINES = {
 	'spyder.pipelines.TextExtractor': 2,
 	'spyder.pipelines.KeywordExtractor': 3,
 	#'spyder.pipelines.Markov': 4,
-	'spyder.pipelines.PageClassifier': 5,
-	'spyder.pipelines.DataWriter': 6
+	#'spyder.pipelines.PageClassifier': 5,
+	#'spyder.pipelines.DataWriter': 6
 }
 
 #DEPTH_PRIORITY = 1
