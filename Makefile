@@ -1,18 +1,38 @@
 FLAGS =
 
 reset:
-	python scripts/reset.py
+	python -c\
+		'from datastore import Datastore;\
+		Datastore().flushdb();'
 
 crawl:
-	rm -f data/*
-	rm -f *.[mt]x[t] *.pyc
-	scrapy crawl google $(FLAGS) 2> data/timelog
+	rm -f *.pyc
+	scrapy crawl google $(FLAGS)
+
+init:
+	python -c\
+		'import sys;\
+		sys.path.extend("../");\
+		from datastore import Datastore;\
+		from defines import *;\
+		Datastore.factory().set(CRAWLER_DATA, {"spider": "google"});'
+
 
 on:
-	python -c "import sys; sys.path.append('../'); from datastore import Datastore; r = Datastore(); r.set('POWER_SWITCH', 'ON')"
+	python -c\
+		'import sys;\
+		sys.path.extend("../");\
+		from datastore import Datastore;\
+		from defines import *;\
+		Datastore.factory().update(POWER_SWITCH, "ON");'
 
 off:
-	python -c "import sys; sys.path.append('../'); from datastore import Datastore; r = Datastore(); r.set('POWER_SWITCH', 'OFF')"
+	python -c\
+		'import sys;\
+		sys.path.extend("../");\
+		from datastore import Datastore;\
+		from defines import *;\
+		Datastore.factory().update(POWER_SWITCH, "OFF");'
 
 process:
 	python scripts/remap.py
