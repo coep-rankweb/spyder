@@ -36,11 +36,19 @@ class DuplicatesFilter(object):
 		Each link's url is assigned an ID and vice versa
 		'''
 		#url has not been processed before
-		self.r.insert(URL_DATA, {'id': self.URL_CTR.next(), 'url': item['url']})
+		new_url_id = -1
+		url_id = self.URL_CTR.next()
+		self.r.insert(URL_DATA, {'id': url_id, 'url': item['url']})
 
 		for link in item['link_set']:
-			if not self.r.find_one(URL_DATA, {'url': link}):
-				self.r.insert(URL_DATA, {'id': self.URL_CTR.next(), 'url': link})
+			res = self.r.find_one(URL_DATA, {'url': link})
+			if not res:
+				new_url_id = self.URL_CTR.next()
+				self.r.insert(URL_DATA, {'id': new_url_id, 'url': link})
+			else:
+				new_url_id = res['id']
+			print url_id, new_url_id
+			self.r.update(URL_DATA, {'id': url_id}, {"$addToSet": {"out_links": new_url_id}})
 
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
