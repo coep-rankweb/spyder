@@ -8,8 +8,9 @@ from unidecode import unidecode
 from scrapy import log
 from urlparse import urljoin, urlparse
 import sys
-sys.path.append("../")
+sys.path.extend(["../", "spyder/"])
 from datastore import Datastore
+from defines import *
 import traceback
 
 class GoogleSpider(CrawlSpider):

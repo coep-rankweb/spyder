@@ -3,11 +3,12 @@ from urlparse import urlparse
 from scrapy.exceptions import IgnoreRequest
 from scrapy.selector import Selector
 import sys
-sys.path.append("../")
+sys.path.extend(["../", "spyder/"])
 from datastore import Datastore
 from defines import *
-import langid
+#import langid
 import base64
+import traceback
 
 class RequestsLimiter(object):
 	def __init__(self):
@@ -15,7 +16,9 @@ class RequestsLimiter(object):
 
 	def process_request(self, request, spider):
 		domain = urlparse(request.url).hostname
-		res = self.r.update(DOMAIN_DATA, {'domain': domain}, {"$inc": {"freq": 1}})
+		self.r.update(DOMAIN_DATA, {'domain': domain}, {"$inc": {"freq": 1}})
+		res = self.r.find_one(DOMAIN_DATA, {'domain': domain})
+		print res
 		if res['freq'] > DOMAIN_LIMIT:
 			raise IgnoreRequest
 		else:
@@ -25,8 +28,8 @@ class RequestsLimiter(object):
 		if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
 			raise IgnoreRequest
 
-		if langid.classify(response.body)[0] != 'en':
-			raise IgnoreRequest
+		#if langid.classify(response.body)[0] != 'en':
+		#	raise IgnoreRequest
 
 		return response
 

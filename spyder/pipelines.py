@@ -1,8 +1,8 @@
 from scrapy import log
-import os, sys
+import os
+import sys
 sys.path.append(os.path.abspath('../'))
 from defines import *
-from webclassifier import WebClassifier
 from datastore import Datastore
 from scrapy.exceptions import DropItem
 import nltk
@@ -64,7 +64,7 @@ class KeywordExtractor(object):
 		self.r = Datastore()
 		self.WORD_CTR = itertools.count()
 		self.stemmer = nltk.stem.PorterStemmer()
-		self.stopwords = nltk.corpus.stopwords.words('english')
+		self.stopwords = set(nltk.corpus.stopwords.words('english'))
 
 	@final_throttle
 	def process_item(self, item, spider):
@@ -86,14 +86,14 @@ class KeywordExtractor(object):
 		url_id = self.r.find_one(URL_DATA, {"url": item['url']}, fields = ['id'])['id']
 		word_id = -1
 		for word in item['words']:
-			res = self.r.find_one(WORD_DATA, {'word': word}, fields = ['id']})
+			res = self.r.find_one(WORD_DATA, {'word': word}, fields = ['id'])
 			if res:
 				word_id = res['id']
 			else:
 				word_id = self.WORD_CTR.next()
 				self.r.insert(WORD_DATA, {'word': word, 'id': word_id})
-			self.r.update(WORD_DATA, {'id': word_id}, {"$addToSet": {"present_in": url_id})
-			self.r.update(URL_DATA, {'id': url_id}, {"$addToSet": {"word_vec": word_id})
+			self.r.update(WORD_DATA, {'id': word_id}, {"$addToSet": {"present_in": url_id}})
+			self.r.update(URL_DATA, {'id': url_id}, {"$addToSet": {"word_vec": word_id}})
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
