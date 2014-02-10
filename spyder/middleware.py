@@ -6,9 +6,10 @@ import sys
 sys.path.extend(["../", "spyder/"])
 from datastore import Datastore
 from defines import *
-#import langid
+import langid
 import base64
 import traceback
+from timer import timeit
 
 class RequestsLimiter(object):
 	def __init__(self):
@@ -27,14 +28,15 @@ class RequestsLimiter(object):
 		if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
 			raise IgnoreRequest
 
-		#if langid.classify(response.body)[0] != 'en':
-		#	raise IgnoreRequest
+		if langid.classify(response.body)[0] != 'en':
+			raise IgnoreRequest
 
 		return response
-
+'''
 class ProxyMiddleware(object):
 	def process_request(self, request, spider):
 		request.meta['proxy'] = "http://10.1.101.150:3128"
-		proxy_user_pass = "111301014:Test_123"
+		proxy_user_pass = "111301012:Test_123"
 		encoded_user_pass = base64.encodestring(proxy_user_pass)
 		request.headers['Proxy-Authorization'] = 'Basic ' + encoded_user_pass
+'''

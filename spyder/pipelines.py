@@ -9,6 +9,7 @@ import nltk
 from unidecode import unidecode
 from throttler import throttle, final_throttle
 import itertools
+from timer import timeit
 
 
 class DuplicatesFilter(object):
@@ -22,12 +23,14 @@ class DuplicatesFilter(object):
 		self.r = Datastore()
 		self.URL_CTR = itertools.count()
 
+	@timeit("DuplicatesFilter")
 	@throttle
 	def process_item(self, item, spider):
 		if self.r.find_one(URL_DATA, {'url': item['url']}): #duplicate
 			raise DropItem
 		else: #process new item
 			self.buildURLIndex(item)
+
 		return item
 
 	def buildURLIndex(self, item):
@@ -51,6 +54,8 @@ class DuplicatesFilter(object):
 
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
+
+	@timeit("TextExtractor")
 	@throttle
 	def process_item(self, item, spider):
 		if not item['raw_html']:
@@ -73,6 +78,7 @@ class KeywordExtractor(object):
 		self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set(nltk.corpus.stopwords.words('english'))
 
+	@timeit("KeywordExtractor")
 	@throttle
 	def process_item(self, item, spider):
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
@@ -84,6 +90,7 @@ class KeywordExtractor(object):
 
 		return item
 
+	@timeit("KeywordExtractor:buildWordIndex")
 	def buildWordIndex(self, item):
 		'''
 		Get current url id
@@ -92,15 +99,13 @@ class KeywordExtractor(object):
 		'''
 		url_id = self.r.find_one(URL_DATA, {"url": item['url']}, fields = ['id'])['id']
 		word_id = -1
+		print item['url'], ": ", len(item['words'])
 		for word in item['words']:
-			res = self.r.find_one(WORD_DATA, {'word': word}, fields = ['id'])
-			if res:
-				word_id = res['id']
-			else:
-				word_id = self.WORD_CTR.next()
-				self.r.insert(WORD_DATA, {'word': word, 'id': word_id})
+			res = self.r.find_and_modify (WORD_DATA, {'word': word}, {"$setOnInsert": {"word": word, "id":self.WORD_CTR.next()}}, upsert = True, full_response=True, new=True)
+			word_id = res['value']['id']
 			self.r.update(WORD_DATA, {'id': word_id}, {"$addToSet": {"present_in": url_id}})
 			self.r.update(URL_DATA, {'id': url_id}, {"$addToSet": {"word_vec": word_id}})
+
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
@@ -114,6 +119,8 @@ class Analytics(object):
 		self.TOP_N = 5
 		self.bgm = nltk.collocations.BigramAssocMeasures
 		self.SCORER_FN = self.bgm.likelihood_ratio
+
+	@timeit("Analytics")
 	@final_throttle
 	def process_item(self, item, spider):
 		self.digram(item)

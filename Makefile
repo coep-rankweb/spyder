@@ -5,6 +5,9 @@ reset:
 	python -c\
 		'from datastore import Datastore;\
 		Datastore().flushdb();'
+	rm -f spyder/*.pyc
+	rm -f spyder/spiders/*.pyc
+	rm -f scripts/*.pyc
 
 crawl:
 	rm -f *.pyc

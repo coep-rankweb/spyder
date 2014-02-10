@@ -28,3 +28,6 @@ class Datastore:
 
 	def flushdb(self):
 		return self.client.drop_database(self.db)
+
+	def find_and_modify(self, collection, *args, **kwargs):
+		return self.db[collection].find_and_modify(*args, **kwargs)
