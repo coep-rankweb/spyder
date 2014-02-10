@@ -10,9 +10,13 @@ from throttler import throttle, final_throttle
 import itertools
 from timer import timeit
 from pymongo import MongoClient
+from urlparse import urlparse
 
-r = MongoClient(os.environ.get("MONGOHQ_URL"))
-db = r[DB_NAME]
+
+MU = os.environ.get("MONGOHQ_URL")
+r = MongoClient(MU)
+if MU: db = r[urlparse(MU).path[1:]]
+else: db = r[DB_NAME]
 u = db[URL_DATA]
 w = db[WORD_DATA]
 c = db[CRAWLER_DATA]
@@ -33,7 +37,7 @@ class DuplicatesFilter(object):
 	def __init__(self):
 		self.URL_CTR = itertools.count()
 
-	@timeit("DuplicatesFilter")
+	#@timeit("DuplicatesFilter")
 	@throttle
 	def process_item(self, item, spider):
 		if u.find_one({'url': item['url']}): #duplicate
@@ -65,7 +69,7 @@ class DuplicatesFilter(object):
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
 
-	@timeit("TextExtractor")
+	#@timeit("TextExtractor")
 	@throttle
 	def process_item(self, item, spider):
 		if not item['raw_html']:
@@ -85,9 +89,9 @@ class KeywordExtractor(object):
 	def __init__(self):
 		self.WORD_CTR = itertools.count()
 		self.stemmer = nltk.stem.PorterStemmer()
-		self.stopwords = set(nltk.corpus.stopwords.words('english'))
+		self.stopwords = set(['all', 'just', 'being', 'over', 'both', 'through', 'yourselves', 'its', 'before', 'herself', 'had', 'should', 'to', 'only', 'under', 'ours', 'has', 'do', 'them', 'his', 'very', 'they', 'not', 'during', 'now', 'him', 'nor', 'did', 'this', 'she', 'each', 'further', 'where', 'few', 'because', 'doing', 'some', 'are', 'our', 'ourselves', 'out', 'what', 'for', 'while', 'does', 'above', 'between', 't', 'be', 'we', 'who', 'were', 'here', 'hers', 'by', 'on', 'about', 'of', 'against', 's', 'or', 'own', 'into', 'yourself', 'down', 'your', 'from', 'her', 'their', 'there', 'been', 'whom', 'too', 'themselves', 'was', 'until', 'more', 'himself', 'that', 'but', 'don', 'with', 'than', 'those', 'he', 'me', 'myself', 'these', 'up', 'will', 'below', 'can', 'theirs', 'my', 'and', 'then', 'is', 'am', 'it', 'an', 'as', 'itself', 'at', 'have', 'in', 'any', 'if', 'again', 'no', 'when', 'same', 'how', 'other', 'which', 'you', 'after', 'most', 'such', 'why', 'a', 'off', 'i', 'yours', 'so', 'the', 'having', 'once'])
 
-	@timeit("KeywordExtractor")
+	#@timeit("KeywordExtractor")
 	@throttle
 	def process_item(self, item, spider):
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
@@ -101,7 +105,7 @@ class KeywordExtractor(object):
 		print item['url']
 		return item
 
-	@timeit("KeywordExtractor:buildWordIndex")
+	#@timeit("KeywordExtractor:buildWordIndex")
 	def buildWordIndex(self, item):
 		'''
 		Get current url id
@@ -134,7 +138,7 @@ class Analytics(object):
 		self.bgm = nltk.collocations.BigramAssocMeasures
 		self.SCORER_FN = self.bgm.likelihood_ratio
 
-	@timeit("Analytics")
+	#@timeit("Analytics")
 	@final_throttle
 	def process_item(self, item, spider):
 		self.digram(item)

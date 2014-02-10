@@ -2,13 +2,7 @@ FLAGS =
 clear:
 	make reset && make init && make on
 reset:
-	python -c\
-		'import sys, os;\
-		sys.path.extend(["../", "spyder/"]);\
-		from pymongo import MongoClient;\
-		from defines import *;\
-		r = MongoClient(os.environ.get("MONGOHQ_URL"));\
-		r.drop_database(DB_NAME);'
+	python -c 'from control import *; reset();'
 	rm -f spyder/*.pyc
 	rm -f spyder/spiders/*.pyc
 	rm -f scripts/*.pyc
@@ -19,38 +13,14 @@ crawl:
 	scrapy crawl google $(FLAGS)
 
 init:
-	python -c\
-		'import sys, os;\
-		sys.path.extend(["../", "spyder/"]);\
-		from pymongo import MongoClient;\
-		from defines import *;\
-		r = MongoClient(os.environ.get("MONGOHQ_URL"));\
-		db = r[DB_NAME];\
-		c = db[CRAWLER_DATA];\
-		c.insert({"spider": "google", "processed_ctr": 0});'
+	python -c 'import control; control.init();'
 
 
 on:
-	python -c\
-		'import sys, os;\
-		sys.path.extend(["../", "spyder/"]);\
-		from pymongo import MongoClient;\
-		from defines import *;\
-		r = MongoClient(os.environ.get("MONGOHQ_URL"));\
-		db = r[DB_NAME];\
-		c = db[CRAWLER_DATA];\
-		c.update({"spider": "google"}, {"$$set": {"POWER_SWITCH": "ON"}});'
+	python -c 'import control; control.on();'
 
 off:
-	python -c\
-		'import sys, os;\
-		sys.path.extend(["../", "spyder/"]);\
-		from pymongo import MongoClient;\
-		from defines import *;\
-		r = MongoClient(os.environ.get("MONGOHQ_URL"));\
-		db = r[DB_NAME];\
-		c = db[CRAWLER_DATA];\
-		c.update({"spider": "google"}, {"$$set": {"POWER_SWITCH": "OFF"}});'
+	python -c 'import control; control.off();'
 
 process:
 	python scripts/remap.py

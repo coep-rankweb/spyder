@@ -10,11 +10,15 @@ import langid
 import base64
 import traceback
 from timer import timeit
+from urlparse import urlparse
+
 
 class RequestsLimiter(object):
 	def __init__(self):
-		self.r = MongoClient(os.environ.get("MONGOHQ_URL"))
-		self.db = self.r[DB_NAME]
+		MU = os.environ.get("MONGOHQ_URL")
+		self.r = MongoClient(MU)
+		if MU: self.db = self.r[urlparse(MU).path[1:]]
+		else: self.db = self.r[DB_NAME]
 		self.d = self.db[DOMAIN_DATA]
 
 	def process_request(self, request, spider):

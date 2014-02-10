@@ -8,7 +8,7 @@ def timeit(argument):
 			ts = time.time()
 			result = method(*args, **kw)
 			te = time.time()
-			print('%s: %5.10f sec' % (argument, te-ts), end = "\n", file = open("data/timelog", "a"))
+			print('%s: %5.10f sec' % (argument, te-ts), end = "\n", file = open("timelog", "a"))
 			return result
 		return wrapper
 	return decorator

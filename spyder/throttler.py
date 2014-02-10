@@ -4,6 +4,8 @@ import time
 sys.path.append(os.path.abspath('../'))
 from defines import *
 from pymongo import MongoClient
+from urlparse import urlparse
+
 
 def throttle(method):
 	def wrapper(class_obj, item, *args, **kwargs):
@@ -15,8 +17,10 @@ def throttle(method):
 def final_throttle(method):
 	def wrapper(class_obj, item, *args, **kwargs):
 		if item['shutdown']:
-			r = MongoClient(os.environ.get("MONGOHQ_URL"))
-			db = r[DB_NAME]
+			MU = os.environ.get("MONGOHQ_URL")
+			r = MongoClient(MU)
+			if MU: db = r[urlparse(MU).path[1:]]
+			else: db = r[DB_NAME]
 			c = db[CRAWLER_DATA]
 			c.update({"spider": "google"}, {"$set": {"POWER_SWITCH": "KILL"}})
 			return item

@@ -22,8 +22,11 @@ class GoogleSpider(CrawlSpider):
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
 	)
-	r = MongoClient(os.environ.get("MONGOHQ_URL"))
-	db = r[DB_NAME]
+
+	MU = os.environ.get("MONGOHQ_URL")
+	r = MongoClient(MU)
+	if MU: db = r[urlparse(MU).path[1:]]
+	else: db = r[DB_NAME]
 	c = db[CRAWLER_DATA]
 
 	def process(self, response):
