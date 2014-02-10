@@ -81,7 +81,7 @@ class KeywordExtractor(object):
 		self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set.union(set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search']), nltk.corpus.stopwords.words('english'))
 
-	@final_throttle
+	@throttle
 	def process_item(self, item, spider):
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = nltk.wordpunct_tokenize(text)
@@ -114,6 +114,35 @@ class KeywordExtractor(object):
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
 
+class Analytics(object):
+	'''
+	Text analytics (if any)
+	'''
+	def __init__(self):
+		self.r = Datastore.factory()
+		self.TOP_N = 5
+		self.bgm = nltk.collocations.BigramAssocMeasures
+		self.SCORER_FN = self.bgm.likelihood_ratio
+
+	@final_throttle
+	def process_item(self, item, spider):
+		self.digram(item)
+		self.freq(item)
+		return item
+
+	def digram(self, item):
+		finder = nltk.collocations.BigramCollocationFinder.from_words(item['words'])
+		digrams = finder.nbest(self.SCORER_FN, self.TOP_N)
+		for digram in digrams:
+			base_id = int(self.r.get("%s:%s" % (WORD2ID, digram[0])))
+			next_id = int(self.r.get("%s:%s" % (WORD2ID, digram[1])))
+			# Difficult to implement this
+			#self.r.update(COLLOCATIONS_DATA, {'base': base_id}, {"$inc": {'next.' + str(next_id): 1}})
+
+	def freq(self, item):
+		for w in item['words']:
+			word_id = self.r.get("%s:%s" % (WORD2ID, w))
+			self.r.incr("%s:%s" % (WORD_FREQ, word_id)) 
 
 class Stat(object):
 	def __init__(self):
