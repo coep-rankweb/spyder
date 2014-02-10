@@ -3,7 +3,7 @@ import sys, os
 import time
 sys.path.append(os.path.abspath('../'))
 from defines import *
-from datastore import Datastore
+from pymongo import MongoClient
 
 def throttle(method):
 	def wrapper(class_obj, item, *args, **kwargs):
@@ -15,7 +15,10 @@ def throttle(method):
 def final_throttle(method):
 	def wrapper(class_obj, item, *args, **kwargs):
 		if item['shutdown']:
-			Datastore().update(CRAWLER_DATA, {"spider": "google"}, {"$set": {"POWER_SWITCH": "KILL"}})
+			r = MongoClient(os.environ.get("MONGOHQ_URL"))
+			db = r[DB_NAME]
+			c = db[CRAWLER_DATA]
+			c.update({"spider": "google"}, {"$set": {"POWER_SWITCH": "KILL"}})
 			return item
 		return method(class_obj, item, *args, **kwargs)
 	return wrapper

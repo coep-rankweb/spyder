@@ -3,8 +3,16 @@ clear:
 	make reset && make init && make on
 reset:
 	python -c\
-		'from datastore import Datastore;\
-		Datastore().flushdb();'
+		'import sys, os;\
+		sys.path.extend(["../", "spyder/"]);\
+		from pymongo import MongoClient;\
+		from defines import *;\
+		r = MongoClient(os.environ.get("MONGOHQ_URL"));\
+		r.drop_database(DB_NAME);'
+	rm -f spyder/*.pyc
+	rm -f spyder/spiders/*.pyc
+	rm -f scripts/*.pyc
+	rm -f data/*
 
 crawl:
 	rm -f *.pyc
@@ -12,28 +20,37 @@ crawl:
 
 init:
 	python -c\
-		'import sys;\
+		'import sys, os;\
 		sys.path.extend(["../", "spyder/"]);\
-		from datastore import Datastore;\
+		from pymongo import MongoClient;\
 		from defines import *;\
-		Datastore().insert(CRAWLER_DATA, {"spider": "google"});'
+		r = MongoClient(os.environ.get("MONGOHQ_URL"));\
+		db = r[DB_NAME];\
+		c = db[CRAWLER_DATA];\
+		c.insert({"spider": "google", "processed_ctr": 0});'
 
 
 on:
 	python -c\
-		'import sys;\
+		'import sys, os;\
 		sys.path.extend(["../", "spyder/"]);\
-		from datastore import Datastore;\
+		from pymongo import MongoClient;\
 		from defines import *;\
-		Datastore().update(CRAWLER_DATA, {"spider": "google"}, {"$$set": {"POWER_SWITCH": "ON"}});'
+		r = MongoClient(os.environ.get("MONGOHQ_URL"));\
+		db = r[DB_NAME];\
+		c = db[CRAWLER_DATA];\
+		c.update({"spider": "google"}, {"$$set": {"POWER_SWITCH": "ON"}});'
 
 off:
 	python -c\
-		'import sys;\
+		'import sys, os;\
 		sys.path.extend(["../", "spyder/"]);\
-		from datastore import Datastore;\
+		from pymongo import MongoClient;\
 		from defines import *;\
-		Datastore().update(CRAWLER_DATA, {"spider": "google"}, {"$$set": {"POWER_SWITCH": "OFF"}});'
+		r = MongoClient(os.environ.get("MONGOHQ_URL"));\
+		db = r[DB_NAME];\
+		c = db[CRAWLER_DATA];\
+		c.update({"spider": "google"}, {"$$set": {"POWER_SWITCH": "OFF"}});'
 
 process:
 	python scripts/remap.py

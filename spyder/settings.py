@@ -18,8 +18,6 @@ LOG_LEVEL = 'ERROR'
 DEPTH_LEVEL = 3
 
 DOWNLOADER_MIDDLEWARES = {
-	#'spyder.middleware.ProxyMiddleware': 100,
-	#'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 112,
 	'scrapy.contrib.downloadermiddleware.robotstxt.RobotsTxtMiddleware':541,
 	'spyder.middleware.RequestsLimiter': 543,
 }
