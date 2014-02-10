@@ -7,11 +7,11 @@ from scrapy.exceptions import CloseSpider
 from unidecode import unidecode
 from scrapy import log
 from urlparse import urljoin, urlparse
-import sys
+import sys, os
 sys.path.extend(["../", "spyder/"])
-from datastore import Datastore
 from defines import *
 import traceback
+from pymongo import MongoClient
 
 class GoogleSpider(CrawlSpider):
 	name = "google"
@@ -22,10 +22,12 @@ class GoogleSpider(CrawlSpider):
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
 	)
-	r = Datastore()
+	r = MongoClient(os.environ.get("MONGOHQ_URL"))
+	db = r[DB_NAME]
+	c = db[CRAWLER_DATA]
 
 	def process(self, response):
-		status = self.r.find_one(CRAWLER_DATA, {'spider': 'google'})['POWER_SWITCH']
+		status = self.c.find_one({'spider': 'google'})['POWER_SWITCH']
 		item = WebItem()
 		if status == "KILL":
 			raise CloseSpider("shutdown")
