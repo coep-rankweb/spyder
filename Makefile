@@ -8,6 +8,7 @@ reset:
 	rm -f spyder/*.pyc
 	rm -f spyder/spiders/*.pyc
 	rm -f scripts/*.pyc
+	rm -f data/*
 
 crawl:
 	rm -f *.pyc
@@ -19,7 +20,7 @@ init:
 		sys.path.extend(["../", "spyder/"]);\
 		from datastore import Datastore;\
 		from defines import *;\
-		Datastore().insert(CRAWLER_DATA, {"spider": "google"});'
+		Datastore().insert(CRAWLER_DATA, {"spider": "google", "processed_ctr": 0});'
 
 
 on:
