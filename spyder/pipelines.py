@@ -216,7 +216,7 @@ class DataWriter(object):
 		self.writeURL(item)
 		self.writeKeywords(item)
 		self.writeWebMatrix(item)
-		self.writeClasses(item)
+		#self.writeClasses(item)
 		self.r.incr(self.PROCESSED_CTR, 1)
 		return item
 
