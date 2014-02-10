@@ -1,0 +1,13 @@
+pymongo
+nltk
+BeautifulSoup
+Scrapy
+Twisted
+Unidecode
+simplejson
+six
+nose
+wsgiref
+cssselect
+langid
+base58
