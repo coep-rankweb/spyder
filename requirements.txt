@@ -3,11 +3,6 @@ nltk
 BeautifulSoup
 Scrapy
 Twisted
-Twisted-Conch
-Twisted-Core
-Twisted-Mail
-Twisted-Names
-Twisted-Web
 Unidecode
 simplejson
 six
@@ -15,4 +10,4 @@ nose
 wsgiref
 cssselect
 langid
-base64
+base58
