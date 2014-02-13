@@ -33,6 +33,17 @@ ITEM_PIPELINES = {
 	'spyder.pipelines.DataWriter': 6
 }
 
+
+MEMDEBUG_ENABLED = True
+MEMUSAGE_ENABLED = True
+MEMUSAGE_REPORT = True
+
+MEMDEBUG_NOTIFY = ['js128793817@gmail.com']
+MEMUSAGE_LIMIT_MB = 3072
+MEMUSAGE_NOTIFY_MAIL = ['add.harry@gmail.com', 'saurabhkb123@gmail.com', 'kr.srinath2011@gmail.com']
+MEMUSAGE_WARNING_MB = 1024
+
+
 #DEPTH_PRIORITY = 1
 #SCHEDULER_DISK_QUEUE = 'scrapy.squeue.PickleFifoDiskQueue'
 #SCHEDULER_MEMORY_QUEUE = 'scrapy.squeue.FifoMemoryQueue'

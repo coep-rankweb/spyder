@@ -1,10 +1,10 @@
-FLAGS = --nolog
+FLAGS = --nolog -s JOBDIR=data/google_spider
 
 reset:
 	python scripts/reset.py
 
 crawl:
-	rm -f data/*
+	rm -rf data/*
 	rm -f *.[mt]x[t] *.pyc
 	scrapy crawl google $(FLAGS) 2> data/timelog
 

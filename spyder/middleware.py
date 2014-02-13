@@ -27,18 +27,24 @@ class RequestsLimiter(object):
 			raise IgnoreRequest
 
 	def process_response(self, request, response, spider):
-		if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
-			log.msg(vars(request), level=log.WARNING)
+		try:
+
+			if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
+				log.msg(vars(request), level=log.WARNING)
+				raise IgnoreRequest
+
+			if langid.classify(response.body)[0] != 'en':
+				raise IgnoreRequest
+		except KeyError:
 			raise IgnoreRequest
 
-		if langid.classify(response.body)[0] != 'en':
-			raise IgnoreRequest
-
+		del request
 		return response
-
+'''
 class ProxyMiddleware(object):
 	def process_request(self, request, spider):
 		request.meta['proxy'] = "http://10.1.101.150:3128"
 		proxy_user_pass = "111301014:Test_123"
 		encoded_user_pass = base64.encodestring(proxy_user_pass)
 		request.headers['Proxy-Authorization'] = 'Basic ' + encoded_user_pass
+'''

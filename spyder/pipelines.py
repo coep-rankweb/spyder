@@ -22,10 +22,12 @@ class DuplicatesFilter(object):
 		self.ID_TO_URL = "ID2URL"
 		self.URL_SET = "URL_SET"
 		self.URL_CTR = "URL_CTR"
-		self.r.set(self.URL_CTR, -1)
+		#self.r.set(self.URL_CTR, -1)
 
 	@timeit("DuplicatesFilter")
 	def process_item(self, item, spider):
+		if not item: raise DropItem
+
 		if item['shutdown']:
 			return item
 
@@ -89,7 +91,7 @@ class KeywordExtractor(object):
 		self.WORD_TO_ID = "WORD2ID"
 		self.WORD_IN = "WORD_IN"
 		self.WORD_CTR = "WORD_CTR"
-		self.r.set(self.WORD_CTR, -1)
+		#self.r.set(self.WORD_CTR, -1)
 		self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set.union(set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search']), nltk.corpus.stopwords.words('english'))
 
@@ -189,19 +191,19 @@ class PageClassifier(object):
 
 class DataWriter(object):
 	def __init__(self):
-		self.f_url = open("data/url.txt", "w")
-		self.f_key = open("data/keywords.txt", "w")
-		self.f_mat = open("data/matrix.mtx", "w")
-		self.f_cla = open("data/classes.txt", "w")
+		self.f_url = open("data/url.txt", "a")
+		self.f_key = open("data/keywords.txt", "a")
+		self.f_mat = open("data/matrix.mtx", "a")
+		self.f_cla = open("data/classes.txt", "a")
 		self.r = Datastore()
 
 		self.URL_TO_ID = "URL2ID"
 		self.ID_TO_URL = "ID2URL"
 		self.PROCESSED_CTR = "PROCESSED_CTR"
 
-		l = enumerate(os.listdir("/home/nvdia/kernel_panic/core/config_data/classes_odp"))
+		'''l = enumerate(os.listdir("/home/nvdia/kernel_panic/core/config_data/classes_odp"))
 		l = [(x[0] + 1, x[1]) for x in l]
-		self.classes = dict(l)
+		self.classes = dict(l)'''
 
 	@timeit("DataWriter")
 	def process_item(self, item, spider):
