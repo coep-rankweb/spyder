@@ -16,3 +16,269 @@ Traceback (most recent call last):
   File "/usr/local/lib/python2.7/dist-packages/redis/connection.py", line 235, in connect
     raise ConnectionError(self._error_message(e))
 redis.exceptions.ConnectionError: Error 111 connecting localhost:6379. Connection refused.
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 om6sm10882455pbc.43 - gsmtp')
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 pp5sm11067791pbb.33 - gsmtp')
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 qf7sm27875097pac.14 - gsmtp')
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 jk16sm11422167pbb.34 - gsmtp')
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 rb6sm11590988pbb.41 - gsmtp')
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 c7sm11852308pbt.0 - gsmtp')
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 ei4sm11985004pbb.42 - gsmtp')
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 js7sm12231772pbc.35 - gsmtp')
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 15, in sendMail
+    smtpserver.login(gmail_user, gmail_pwd)
+  File "/usr/lib/python2.7/smtplib.py", line 613, in login
+    raise SMTPAuthenticationError(code, resp)
+smtplib.SMTPAuthenticationError: (534, '5.7.9 Please log in with your web browser and then try again. Learn more at\n5.7.9 https://support.google.com/mail/bin/answer.py?answer=78754 om6sm12463134pbc.43 - gsmtp')
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 31, in <module>
+    if out.find("/usr/bin/python") == -1 and not r.get("USER_PROMPTED"):
+  File "/usr/local/lib/python2.7/dist-packages/redis/client.py", line 616, in get
+    return self.execute_command('GET', name)
+  File "/usr/local/lib/python2.7/dist-packages/redis/client.py", line 397, in execute_command
+    connection.send_command(*args)
+  File "/usr/local/lib/python2.7/dist-packages/redis/connection.py", line 306, in send_command
+    self.send_packed_command(self.pack_command(*args))
+  File "/usr/local/lib/python2.7/dist-packages/redis/connection.py", line 288, in send_packed_command
+    self.connect()
+  File "/usr/local/lib/python2.7/dist-packages/redis/connection.py", line 235, in connect
+    raise ConnectionError(self._error_message(e))
+redis.exceptions.ConnectionError: Error 111 connecting localhost:6379. Connection refused.
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+Traceback (most recent call last):
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 34, in <module>
+    sendMail(s)
+  File "/home/nvdia/kernel_panic/core/spyder/scripts/logger.py", line 11, in sendMail
+    smtpserver = smtplib.SMTP("smtp.gmail.com",587)
+  File "/usr/lib/python2.7/smtplib.py", line 249, in __init__
+    (code, msg) = self.connect(host, port)
+  File "/usr/lib/python2.7/smtplib.py", line 309, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+  File "/usr/lib/python2.7/smtplib.py", line 284, in _get_socket
+    return socket.create_connection((port, host), timeout)
+  File "/usr/lib/python2.7/socket.py", line 553, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+socket.gaierror: [Errno -2] Name or service not known
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!
+done!

@@ -191,10 +191,10 @@ class PageClassifier(object):
 
 class DataWriter(object):
 	def __init__(self):
-		self.f_url = open("data/url.txt", "a")
-		self.f_key = open("data/keywords.txt", "a")
-		self.f_mat = open("data/matrix.mtx", "a")
-		self.f_cla = open("data/classes.txt", "a")
+		self.f_url = open("data/url.txt", "a+")
+		self.f_key = open("data/keywords.txt", "a+")
+		self.f_mat = open("data/matrix.mtx", "a+")
+		self.f_cla = open("data/classes.txt", "a+")
 		self.r = Datastore()
 
 		self.URL_TO_ID = "URL2ID"

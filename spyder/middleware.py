@@ -23,19 +23,21 @@ class RequestsLimiter(object):
 			self.r.incr(self.DOMAIN + ":" + domain, 1)
 			return None
 		else:
-			log.msg(request.url, level=log.WARNING)
+			log.msg(request.url, level=log.CRITICAL)
 			raise IgnoreRequest
 
 	def process_response(self, request, response, spider):
 		try:
 
 			if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
-				log.msg(vars(request), level=log.WARNING)
+				log.msg(request.url, level=log.CRITICAL)
 				raise IgnoreRequest
 
 			if langid.classify(response.body)[0] != 'en':
+				log.msg(request.url, level=log.CRITICAL)
 				raise IgnoreRequest
 		except KeyError:
+			log.msg(request.url, level=log.CRITICAL)
 			raise IgnoreRequest
 
 		del request

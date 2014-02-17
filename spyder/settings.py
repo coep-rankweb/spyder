@@ -12,7 +12,7 @@ SPIDER_MODULES = ['spyder.spiders']
 NEWSPIDER_MODULE = 'spyder.spiders'
 CONCURRENT_REQUESTS = 100
 
-LOG_LEVEL = 'ERROR'
+LOG_LEVEL = 'CRITICAL'
 LOG_FILE = 'data/log.txt'
 
 DEPTH_LEVEL = 3
