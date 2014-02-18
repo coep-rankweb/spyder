@@ -61,7 +61,7 @@ class GoogleSpider(CrawlSpider):
 				item['link_set'] = set(abs_links)
 
 				return item
-			except Exception:
+			except (KeyError, IndexError, TypeError, ValueError, IOError) as e:
 				traceback.print_exc()
 		elif status == "OFF":
 			item['shutdown'] = True
@@ -79,6 +79,6 @@ class GoogleSpider(CrawlSpider):
 		temp = s
 		try:
 			temp = unicode(temp, encoding = "UTF-8")
-		except:
+		except TypeError:
 			pass
 		return unidecode(temp)

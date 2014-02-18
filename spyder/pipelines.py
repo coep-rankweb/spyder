@@ -12,18 +12,6 @@ from timer import timeit
 from pymongo import MongoClient
 from urlparse import urlparse
 
-r = MongoClient()
-db = r[DB_NAME]
-u = db[URL_DATA]
-w = db[WORD_DATA]
-c = db[CRAWLER_DATA]
-co = db[COLLOCATIONS_DATA]
-f = db[FREQ_DATA]
-
-u.create_index('url')
-w.create_index('word')
-co.create_index('base')
-
 MU = os.environ.get("MONGOHQ_URL")
 r = MongoClient(MU)
 if MU: db = r[urlparse(MU).path[1:]]
@@ -87,8 +75,10 @@ class TextExtractor(object):
 			item['extracted_text'] = ""
 		else:
 			temp = nltk.clean_html(item['raw_html'])
-			try: temp = unicode(temp, encoding = "UTF-8")
-			except: pass
+			try:
+				temp = unicode(temp, encoding = "UTF-8")
+			except TypeError:
+				pass
 			item['extracted_text'] = unidecode(temp)
 		return item
 
@@ -113,8 +103,6 @@ class KeywordExtractor(object):
 		item['words'] = set(cleaned_words) - self.stopwords
 		self.buildWordIndex(item)
 
-		c.update({'spider': 'google'}, {"$inc": {'processed_ctr': 1}})
-		print item['url']
 		return item
 
 	#@timeit("KeywordExtractor:buildWordIndex")
@@ -156,6 +144,8 @@ class Analytics(object):
 	def process_item(self, item, spider):
 		self.digram(item)
 		self.freq(item)
+		c.update({'spider': 'google'}, {"$inc": {'processed_ctr': 1}})
+		print item['url']
 		return item
 
 	def digram(self, item):
