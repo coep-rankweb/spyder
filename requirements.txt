@@ -9,5 +9,4 @@ six
 nose
 wsgiref
 cssselect
-langid
 base58
