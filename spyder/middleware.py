@@ -24,10 +24,9 @@ class RequestsLimiter(object):
 				self.r.incr(self.DOMAIN + ":" + domain, 1)
 				return None
 			else:
-				log.msg(request.url, level=log.CRITICAL)
+				log.msg("DOMAIN limit Crossed:%s" % request.url, level=log.CRITICAL)
 				raise IgnoreRequest
 		except TypeError as e:
-			print request.url
 			raise IgnoreRequest
 
 
@@ -35,14 +34,14 @@ class RequestsLimiter(object):
 		try:
 
 			if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
-				log.msg(request.url, level=log.CRITICAL)
+				log.msg("Non-HTML/Plain:%s" % request.url, level=log.CRITICAL)
 				raise IgnoreRequest
 
 			if langid.classify(response.body)[0] != 'en':
-				log.msg(request.url, level=log.CRITICAL)
+				log.msg("Non-English:%s" % request.url, level=log.CRITICAL)
 				raise IgnoreRequest
 		except KeyError:
-			log.msg(request.url, level=log.CRITICAL)
+			log.msg("KeyError(Content-Type):%s" % request.url, level=log.CRITICAL)
 			raise IgnoreRequest
 
 		del request

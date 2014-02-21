@@ -24,7 +24,7 @@ REDIRECT_ENABLED = False
 AJAXCRAWL_ENABLED = True
 
 
-DUPEFILTER_CLASS = 'scrapy.dupefilter.BaseDupeFilter'
+DUPEFILTER_CLASS = 'spyder.nofilter.NoFilter'
 
 DOWNLOADER_MIDDLEWARES = {
 	#'spyder.middleware.ProxyMiddleware': 100,
@@ -37,7 +37,7 @@ ITEM_PIPELINES = {
 	'spyder.pipelines.DuplicatesFilter': 1,
 	'spyder.pipelines.TextExtractor': 2,
 	'spyder.pipelines.KeywordExtractor': 3,
-	#'spyder.pipelines.Markov': 4,
+	'spyder.pipelines.Analytics': 4,
 	#'spyder.pipelines.PageClassifier': 5,
 	'spyder.pipelines.DataWriter': 6
 }

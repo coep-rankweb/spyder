@@ -36,7 +36,8 @@ class DuplicatesFilter(object):
 				self.scrapy_process = i
 
 	def process_item(self, item, spider):
-		if not item: raise DropItem
+		if not item:
+			raise DropItem
 
 		if self.redis_process.get_memory_info().rss + self.scrapy_process.get_memory_info().rss > self.MEM_THRESHOLD:
 			self.r.set("POWER_SWITCH", "OFF")
@@ -45,13 +46,18 @@ class DuplicatesFilter(object):
 		if item['shutdown']:
 			return item
 
-		if self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url']))):
-			#duplicate
-			raise DropItem
-		elif not item['link_set']:
+		#if self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url']))):
+		#	duplicate
+		#	raise DropItem
+		#elif not item['link_set']:
+		#	raise DropItem
+		#else:
+		#	process new item
+		#	self.buildURLIndex(item)
+
+		if not item['link_set']:
 			raise DropItem
 		else:
-			#process new item
 			self.buildURLIndex(item)
 		return item
 
@@ -83,8 +89,6 @@ class TextExtractor(object):
 		if item['shutdown']:
 			return item
 
-		print item['url']
-
 		if not item['raw_html']:
 			item['extracted_text'] = ""
 		else:
@@ -109,19 +113,20 @@ class KeywordExtractor(object):
 		self.r = Datastore()
 		self.URL2ID = "URL2ID"
 		self.WORD_SET = "WORD_SET"
-		self.WORD_TO_ID = "WORD2ID"
+		self.WORD2ID = "WORD2ID"
 		self.WORD_IN = "WORD_IN"
 		self.WORD_CTR = "WORD_CTR"
 		#self.r.set(self.WORD_CTR, -1)
 		self.stemmer = nltk.stem.PorterStemmer()
-		self.stopwords = set.union(set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search']), nltk.corpus.stopwords.words('english'))
+		self.stopwords = set([self.clean(x) for x in nltk.corpus.stopwords.words('english')])
 
 	def process_item(self, item, spider):
 		if item['shutdown']:
 			return item
 
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
-		words = nltk.wordpunct_tokenize(text)
+		words = [self.clean(x) for x in nltk.wordpunct_tokenize(text)]
+		item['ordered_words'] = words
 		cleaned_words = set(words) - self.stopwords
 		cleaned_words = [self.clean(w) for w in cleaned_words if w.isalnum() and len(w) > 1 and not w.isdigit()]
 		item['words'] = cleaned_words
@@ -129,9 +134,6 @@ class KeywordExtractor(object):
 			raise DropItem
 
 		self.buildWordIndex(item)
-
-		#pos = nltk.pos_tag(words)
-		#item['parts_of_speech'] = [(self.clean(x[0]), x[1]) for x in pos]
 
 		return item
 
@@ -146,53 +148,39 @@ class KeywordExtractor(object):
 		for word in item['words']:
 			if self.r.sadd(self.WORD_SET, word):
 				word_id = str(self.r.incr(self.WORD_CTR, 1))
-				self.r.set("%s:%s" % (self.WORD_TO_ID, word), word_id)
+				self.r.set("%s:%s" % (self.WORD2ID, word), word_id)
 			else:
-				word_id = self.r.get("%s:%s" % (self.WORD_TO_ID, word))
+				word_id = self.r.get("%s:%s" % (self.WORD2ID, word))
 			self.r.sadd("%s:%s" % (self.WORD_IN, word_id), url_id)
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
 
 
-class Stat(object):
+class Analytics(object):
 	def __init__(self):
 		self.r = Datastore()
 		self.DIGRAM = "DIGRAM"
-		self.OCCUR = "OCCUR"
-		self.DIGRAM_SET = "DIGRAM_SET"
-		self.OCCUR_SET = "OCCUR_SET"
-		self.DF = "DF"
+		self.WORD2ID = "WORD2ID"
+		self.TOP_N = 5
+		self.bgm = nltk.collocations.BigramAssocMeasures
+		self.SCORER_FN = self.bgm.likelihood_ratio
 
 	def process_item(self, item, spider):
 		if item['shutdown']:
 			return item
 
 		item = self.markov(item)
-		item = self.df(item)
 		return item
 
 	def markov(self, item):
-		pos_iter = iter(item['parts_of_speech'])
-		next_elem = pos_iter.next()
-		while True:
-			try:
-				cur_elem, next_elem = next_elem, pos_iter.next()
-				if cur_elem[1] in allowed and next_elem[1] in allowed:
-					if cur_elem[0].isalnum() and next_elem[0].isalnum():
-						self.r.incr("%s:%s:%s" % (self.DIGRAM, cur_elem[0], next_elem[0]), 1)
-						self.r.incr("%s:%s" % (self.OCCUR, cur_elem[0]), 1)
+		finder = nltk.collocations.BigramCollocationFinder.from_words(item['ordered_words'])
+		digrams = finder.nbest(self.SCORER_FN, self.TOP_N)
 
-						self.r.sadd(self.DIGRAM_SET, "%s:%s" % (cur_elem[0], next_elem[0]))
-						self.r.sadd(self.OCCUR_SET, "%s" % cur_elem[0])
-			except StopIteration:
-				break
-		return item
-
-
-	def df(self, item):
-		for k in item['words']:
-			self.r.incr("%s:%s" % (self.DF, k), 1)
+		for digram in digrams:
+			w0 = self.r.get("%s:%s" % (self.WORD2ID, digram[0]))
+			w1 = self.r.get("%s:%s" % (self.WORD2ID, digram[1]))
+			self.r.incr("%s:%s:%s" % (self.DIGRAM, w0, w1), 1)
 		return item
 
 

@@ -1,4 +1,5 @@
-FLAGS = -s JOBDIR=data/google_spider
+FLAGS = -s JOBDIR=data/google_spider --nolog
+#FLAGS =
 
 reset:
 	python scripts/reset.py
