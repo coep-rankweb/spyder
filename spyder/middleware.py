@@ -17,14 +17,19 @@ class RequestsLimiter(object):
 		self.DOMAIN_SET = "DOMAIN_SET"
 
 	def process_request(self, request, spider):
-		domain = urlparse(request.url).hostname
-		if int(self.r.get(self.DOMAIN + ":" + domain) or 0) < self.LIMIT:
-			self.r.sadd(self.DOMAIN_SET, domain)
-			self.r.incr(self.DOMAIN + ":" + domain, 1)
-			return None
-		else:
-			log.msg(request.url, level=log.CRITICAL)
+		try:
+			domain = urlparse(request.url).hostname
+			if int(self.r.get(self.DOMAIN + ":" + domain) or 0) < self.LIMIT:
+				self.r.sadd(self.DOMAIN_SET, domain)
+				self.r.incr(self.DOMAIN + ":" + domain, 1)
+				return None
+			else:
+				log.msg(request.url, level=log.CRITICAL)
+				raise IgnoreRequest
+		except TypeError as e:
+			print request.url
 			raise IgnoreRequest
+
 
 	def process_response(self, request, response, spider):
 		try:

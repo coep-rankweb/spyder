@@ -16,7 +16,7 @@ class GoogleSpider(CrawlSpider):
 	name = "google"
 	allowed_domains = []
 
-	start_urls = ["http://www.historylearningsite.co.uk/index.htm", "http://www.forbes.com/economics-finance/", "http://www.mit.edu/", "http://www.smithsonianmag.com/"] 
+	start_urls = ["http://www.historylearningsite.co.uk/index.htm", "http://www.forbes.com/economics-finance/", "http://www.mit.edu/", "http://www.smithsonianmag.com/", "http://edition.cnn.com/", "http://www.engadget.com/", "http://www.amazon.com/", "http://espn.go.com/", "http://www.tlc.com/"] 
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
 	)
@@ -50,7 +50,7 @@ class GoogleSpider(CrawlSpider):
 				for l in rel_links:
 					link = urljoin(response.url, l)
 					if urlparse(link).scheme in ['http', 'https']:
-						abs_links.append(link)
+						abs_links.append(self.clean(link))
 				item['link_set'] = abs_links
 
 				return item

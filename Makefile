@@ -4,8 +4,8 @@ reset:
 	python scripts/reset.py
 
 crawl:
-	#rm -rf data/*
-	#rm -f *.[mt]x[t] *.pyc
+	rm -rf data/*
+	rm -f *.[mt]x[t] spyder/*.pyc
 	scrapy crawl google $(FLAGS) 2>> data/timelog
 
 on:

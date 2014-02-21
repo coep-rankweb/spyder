@@ -1,12 +1,14 @@
 from scrapy import log
 import os, sys
 sys.path.append(os.path.abspath('../'))
-from webclassifier import WebClassifier
+#from webclassifier import WebClassifier
 from datastore import Datastore
 from scrapy.exceptions import DropItem
 import nltk
 from unidecode import unidecode
 from timer import timeit
+from pyhashxx import hashxx
+import psutil
 
 
 class DuplicatesFilter(object):
@@ -18,21 +20,35 @@ class DuplicatesFilter(object):
 	'''
 	def __init__(self):
 		self.r = Datastore()
-		self.URL_TO_ID = "URL2ID"
-		self.ID_TO_URL = "ID2URL"
+		self.URL2ID = "URL2ID"
+		self.ID2URL = "ID2URL"
 		self.URL_SET = "URL_SET"
 		self.URL_CTR = "URL_CTR"
+		self.MEM_THRESHOLD = 8 * (10 ** 9)
+		self.redis_process = None
+		self.scrapy_process = None
 		#self.r.set(self.URL_CTR, -1)
 
-	@timeit("DuplicatesFilter")
+		for i in psutil.process_iter():
+			if i.name.find("redis-server") >= 0:
+				self.redis_process = i
+			if i.name.find("scrapy") >= 0:
+				self.scrapy_process = i
+
 	def process_item(self, item, spider):
 		if not item: raise DropItem
+
+		if self.redis_process.get_memory_info().rss + self.scrapy_process.get_memory_info().rss > self.MEM_THRESHOLD:
+			self.r.set("POWER_SWITCH", "OFF")
+			item['shutdown'] = True
 
 		if item['shutdown']:
 			return item
 
-		if self.r.get("%s:%s" % (self.URL_TO_ID, item['url'])):
+		if self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url']))):
 			#duplicate
+			raise DropItem
+		elif not item['link_set']:
 			raise DropItem
 		else:
 			#process new item
@@ -47,22 +63,22 @@ class DuplicatesFilter(object):
 		#url has not been processed before
 		url_id = self.r.incr(self.URL_CTR, 1)
 		self.r.sadd(self.URL_SET, url_id)
-		self.r.set("%s:%d" % (self.ID_TO_URL, url_id), item['url'])
-		self.r.set("%s:%s" % (self.URL_TO_ID, item['url']), url_id)
+		self.r.set("%s:%d" % (self.ID2URL, url_id), item['url'])
+		self.r.set("%s:%s" % (self.URL2ID, hashxx(item['url'])), url_id)
 
 		for link in set(item['link_set']):
-			if not self.r.get("%s:%s" % (self.URL_TO_ID, link)):
+			if not self.r.get("%s:%s" % (self.URL2ID, hashxx(link))):
 				new_url_id = self.r.incr(self.URL_CTR, 1)
 				self.r.sadd(self.URL_SET, new_url_id)
-				self.r.set("%s:%s" % (self.URL_TO_ID, link), new_url_id)
-				self.r.set("%s:%d" % (self.ID_TO_URL, new_url_id), link)
+				self.r.set("%s:%s" % (self.URL2ID, hashxx(link)), new_url_id)
+				self.r.set("%s:%d" % (self.ID2URL, new_url_id), link)
 
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
 	def __init__(self):
+		self.adult_blacklist = ['sex', 'porn', 'xxx', 'fuck', 'nude']
 		pass
 
-	@timeit("TextExtractor")
 	def process_item(self, item, spider):
 		if item['shutdown']:
 			return item
@@ -77,6 +93,11 @@ class TextExtractor(object):
 				temp = unicode(temp, encoding = "UTF-8")
 			except: pass
 			item['extracted_text'] = unidecode(temp)
+
+		lower_extracted_text = item['extracted_text'].lower()
+		for b in self.adult_blacklist:
+			if b in lower_extracted_text:
+				raise DropItem
 		return item
 
 
@@ -86,7 +107,7 @@ class KeywordExtractor(object):
 	'''
 	def __init__(self):
 		self.r = Datastore()
-		self.URL_TO_ID = "URL2ID"
+		self.URL2ID = "URL2ID"
 		self.WORD_SET = "WORD_SET"
 		self.WORD_TO_ID = "WORD2ID"
 		self.WORD_IN = "WORD_IN"
@@ -95,7 +116,6 @@ class KeywordExtractor(object):
 		self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set.union(set(['twitter', 'facebook', 'googl', 'youtub', 'share', 'search']), nltk.corpus.stopwords.words('english'))
 
-	@timeit("KeywordExtractor")
 	def process_item(self, item, spider):
 		if item['shutdown']:
 			return item
@@ -105,6 +125,9 @@ class KeywordExtractor(object):
 		cleaned_words = set(words) - self.stopwords
 		cleaned_words = [self.clean(w) for w in cleaned_words if w.isalnum() and len(w) > 1 and not w.isdigit()]
 		item['words'] = cleaned_words
+		if not item['words']:
+			raise DropItem
+
 		self.buildWordIndex(item)
 
 		#pos = nltk.pos_tag(words)
@@ -118,7 +141,7 @@ class KeywordExtractor(object):
 		For each word in current url's text,
 			add the url to the set of urls which contain that word
 		'''
-		url_id = self.r.get("%s:%s" % (self.URL_TO_ID, item['url']))
+		url_id = self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url'])))
 		word_id = ""
 		for word in item['words']:
 			if self.r.sadd(self.WORD_SET, word):
@@ -141,7 +164,6 @@ class Stat(object):
 		self.OCCUR_SET = "OCCUR_SET"
 		self.DF = "DF"
 
-	@timeit("Stat")
 	def process_item(self, item, spider):
 		if item['shutdown']:
 			return item
@@ -179,7 +201,6 @@ class PageClassifier(object):
 		self.w = WebClassifier()
 		self.w.loadClassifier()
 
-	@timeit("PageClassifier")
 	def process_item(self, item, spider):
 		if item['shutdown']:
 			return item
@@ -197,15 +218,14 @@ class DataWriter(object):
 		self.f_cla = open("data/classes.txt", "a+")
 		self.r = Datastore()
 
-		self.URL_TO_ID = "URL2ID"
-		self.ID_TO_URL = "ID2URL"
+		self.URL2ID = "URL2ID"
+		self.ID2URL = "ID2URL"
 		self.PROCESSED_CTR = "PROCESSED_CTR"
 
 		'''l = enumerate(os.listdir("/home/nvdia/kernel_panic/core/config_data/classes_odp"))
 		l = [(x[0] + 1, x[1]) for x in l]
 		self.classes = dict(l)'''
 
-	@timeit("DataWriter")
 	def process_item(self, item, spider):
 		if item['shutdown']:
 			self.f_url.close()
@@ -234,10 +254,10 @@ class DataWriter(object):
 		'''
 		Builds web graph in matrix market format file
 		'''
-		u = self.r.get("%s:%s" % (self.URL_TO_ID, item['url']))
+		u = self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url'])))
 		v = 0
 		for link in set(item['link_set']):
-			v = self.r.get("%s:%s" % (self.URL_TO_ID, link))
+			v = self.r.get("%s:%s" % (self.URL2ID, hashxx(link)))
 			self.f_mat.write("%s\t%s\t1\n" % (u, v))
 
 	def writeClasses(self, item):
