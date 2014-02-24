@@ -1,6 +1,8 @@
-import redis
+import sys
+sys.path.append("../")
+from datastore import Datastore
 
-r = redis.Redis()
+r = Datastore.factory()
 
 with open("data/url.txt") as f:
 	for index, url in enumerate(f):

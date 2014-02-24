@@ -20,7 +20,7 @@ class GoogleSpider(CrawlSpider):
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
 	)
-	r = Datastore()
+	r = Datastore.factory()
 
 	def process(self, response):
 		status = self.r.get("POWER_SWITCH")

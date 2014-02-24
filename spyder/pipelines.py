@@ -6,10 +6,10 @@ from datastore import Datastore
 from scrapy.exceptions import DropItem
 import nltk
 from unidecode import unidecode
+<<<<<<< HEAD
 from timer import timeit
 from pyhashxx import hashxx
 import psutil
-
 
 class DuplicatesFilter(object):
 	'''
@@ -69,6 +69,7 @@ class DuplicatesFilter(object):
 		-ve id => assigned id and processed
 		no id => not assigned id and not processed
 		'''
+<<<<<<< HEAD
 		hashed_url = hashxx(item['url'])
 		url_id = self.r.get("%s:%s" % (self.URL2ID, hashed_url))
 
@@ -169,10 +170,9 @@ class KeywordExtractor(object):
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
 
-
 class Analytics(object):
 	def __init__(self):
-		self.r = Datastore()
+		self.r = Datastore.factory()
 		self.DIGRAM = "DIGRAM"
 		self.WORD2ID = "WORD2ID"
 		self.TOP_N = 5
