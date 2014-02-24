@@ -16,13 +16,7 @@ class GoogleSpider(CrawlSpider):
 	name = "google"
 	allowed_domains = []
 
-	#start_urls = ["http://www.nobelprize.org/nobel_prizes/physics/laureates/1921/einstein-bio.html"]
-	#start_urls = ["http://en.wikipedia.org/wiki/Bill_Gates"]
-	#start_urls = ["http://www.moreintelligentlife.com/"]
-	#start_urls = ["http://espn.go.com/", "http://www.moreintelligentlife.com/", "http://www.nature.com/browse/index.html", "http://edition.cnn.com/", "http://www.si.edu/", "http://www.amazon.com/"]
-	#start_urls = ["http://www.food.com/", "http://frenchfood.about.com/", "http://www.stanford.edu/", "http://www.paleoportal.org/"]
-	start_urls = ['http://www.foodnetwork.com/recipes/emeril-lagasse/cajun-jambalaya-recipe2.html', 'http://thebrowser.com/', 'http://www.popphoto.com/', 'http://www.technologyreview.com/', 'http://www.goldmansachs.com/index.html?view=desktop', 'http://www.nationalgeographic.com/', "http://www.nobelprize.org/nobel_prizes/physics/laureates/1921/einstein-bio.html"]
-
+	start_urls = ["http://www.forbes.com/economics-finance/", "http://www.stanford.edu/", "http://www.smithsonianmag.com/", "http://edition.cnn.com/", "http://www.microsoft.com/en-us/default.aspx", "http://www.amazon.com/", "http://espn.go.com/", "http://www.tlc.com/", "http://www.microsoft.com/en-us/default.aspx"] 
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
 	)
@@ -51,17 +45,18 @@ class GoogleSpider(CrawlSpider):
 				else: meta = ""
 				item['meta_description'] = meta
 
-				abs_links = []
+				abs_links = set()
 				rel_links = sel.xpath('//a/@href').extract()
 				for l in rel_links:
 					link = urljoin(response.url, l)
 					if urlparse(link).scheme in ['http', 'https']:
-						abs_links.append(link)
+						abs_links.add(self.clean(link))
 				item['link_set'] = abs_links
 
 				return item
-			except Exception:
-				traceback.print_exc()
+			except Exception as e:
+				print e, response.url
+				return None
 		elif status == "OFF":
 			item['shutdown'] = True
 			return item
