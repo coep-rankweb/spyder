@@ -5,6 +5,7 @@ This program builds the document vectors and stores them in redis.
 import redis
 import os
 from itertools import izip
+from pyhashxx import hashxx
 
 base = "/home/nvdia/kernel_panic/core/spyder/"
 url_file = "data/url.txt"
@@ -12,7 +13,7 @@ keyword_file = "data/keywords.txt"
 
 # Namespaces
 DOC_VECTOR = "DOC_VECTOR"
-URL2ID = "URL2ID"
+URL2ID = "N:URL2ID"
 WORD2ID = "WORD2ID"
 
 
@@ -23,7 +24,7 @@ fkeyword = open (os.path.join(base, keyword_file))
 
 for url, keywords in izip(furl, fkeyword):
 
-	url_id = r.get(URL2ID + ":" + url.strip())
+	url_id = r.get(URL2ID + ":" + hashxx(url.strip()))
 	keyword_list = keywords.strip().split(',')[:-1]
 
 	for keyword in keyword_list:

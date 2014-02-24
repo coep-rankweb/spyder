@@ -45,12 +45,12 @@ class GoogleSpider(CrawlSpider):
 				else: meta = ""
 				item['meta_description'] = meta
 
-				abs_links = []
+				abs_links = set()
 				rel_links = sel.xpath('//a/@href').extract()
 				for l in rel_links:
 					link = urljoin(response.url, l)
 					if urlparse(link).scheme in ['http', 'https']:
-						abs_links.append(self.clean(link))
+						abs_links.add(self.clean(link))
 				item['link_set'] = abs_links
 
 				return item

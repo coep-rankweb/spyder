@@ -19,8 +19,8 @@ class NoFilter(BaseDupeFilter):
 
 	def request_seen(self, request):
 		if self.r.get("%s:%s" % (self.URL2ID, hashxx(request.url))):
-				log.msg("FILTER SEEN:%s" % request.url, level = log.CRITICAL)
-				return True
+			log.msg("FILTER SEEN:%s" % request.url, level = log.CRITICAL)
+			return True
 
 	def close(self, reason):
 		pass
