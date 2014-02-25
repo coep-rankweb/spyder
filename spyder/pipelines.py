@@ -24,7 +24,8 @@ class DuplicatesFilter(object):
 		self.ID2URL = "ID2URL"
 		self.URL_SET = "URL_SET"
 		self.URL_CTR = "URL_CTR"
-		self.MEM_THRESHOLD = 8 * (10 ** 9)
+		self.PROCESSED_CTR = "PROCESSED_CTR1"
+		self.MEM_THRESHOLD = 10 * (10 ** 9)
 		self.redis_process = None
 		self.scrapy_process = None
 		#self.r.set(self.URL_CTR, -1)
@@ -39,21 +40,14 @@ class DuplicatesFilter(object):
 		if not item:
 			raise DropItem
 
+		#print "DuplicatesFilter:", item['url']
+
 		if self.redis_process.get_memory_info().rss + self.scrapy_process.get_memory_info().rss > self.MEM_THRESHOLD:
 			self.r.set("POWER_SWITCH", "OFF")
 			item['shutdown'] = True
 
 		if item['shutdown']:
 			return item
-
-		#if self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url']))):
-		#	duplicate
-		#	raise DropItem
-		#elif not item['link_set']:
-		#	raise DropItem
-		#else:
-		#	process new item
-		#	self.buildURLIndex(item)
 
 		if not item['link_set']:
 			raise DropItem
@@ -65,18 +59,40 @@ class DuplicatesFilter(object):
 		'''
 		Assign id to current url
 		Each link's url is assigned an ID and vice versa
+
+		This stage will only be reached if the 'if' condition in nofilter.py fails and the function returns true.
+		The only way the 'if' condition fails is if the url_id of this item's url exists and is negative (=> uit has been processed before)
+
+		Thus, either the url has been assigned an id or it hasnt. If it has, negate its current id . If it hasnt, get a new id from URL_CTR, negate it and assign it to this url. Finally, change URL2ID, ID2URL correspondingly in either case.
+
+		Ultimately,
+		+ve id => assigned id but not processed
+		-ve id => assigned id and processed
+		no id => not assigned id and not processed
 		'''
-		#url has not been processed before
-		url_id = self.r.incr(self.URL_CTR, 1)
+		hashed_url = hashxx(item['url'])
+		url_id = self.r.get("%s:%s" % (self.URL2ID, hashed_url))
+
+		if not url_id:
+			#if self.r.sismember (self.URL_SET, url_id):
+			#	print "Already present"
+			url_id = -1 * self.r.incr(self.URL_CTR, 1)
+		else:
+			self.r.delete("%s:%s" % (self.ID2URL, url_id))
+			self.r.srem(self.URL_SET, url_id)
+			url_id = -1 * int(url_id)
+
 		self.r.sadd(self.URL_SET, url_id)
 		self.r.set("%s:%d" % (self.ID2URL, url_id), item['url'])
-		self.r.set("%s:%s" % (self.URL2ID, hashxx(item['url'])), url_id)
+		self.r.set("%s:%s" % (self.URL2ID, hashed_url), url_id)
 
-		for link in set(item['link_set']):
-			if not self.r.get("%s:%s" % (self.URL2ID, hashxx(link))):
+		self.r.incr(self.PROCESSED_CTR, 1)
+		for link in item['link_set']:
+			hashed_link = hashxx(link)
+			if not self.r.get("%s:%s" % (self.URL2ID, hashed_link)):
 				new_url_id = self.r.incr(self.URL_CTR, 1)
 				self.r.sadd(self.URL_SET, new_url_id)
-				self.r.set("%s:%s" % (self.URL2ID, hashxx(link)), new_url_id)
+				self.r.set("%s:%s" % (self.URL2ID, hashed_link), new_url_id)
 				self.r.set("%s:%d" % (self.ID2URL, new_url_id), link)
 
 class TextExtractor(object):
@@ -123,6 +139,8 @@ class KeywordExtractor(object):
 	def process_item(self, item, spider):
 		if item['shutdown']:
 			return item
+
+		print item['url']
 
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = [self.clean(x) for x in nltk.wordpunct_tokenize(text)]
@@ -208,7 +226,7 @@ class DataWriter(object):
 
 		self.URL2ID = "URL2ID"
 		self.ID2URL = "ID2URL"
-		self.PROCESSED_CTR = "PROCESSED_CTR"
+		self.PROCESSED_CTR = "PROCESSED_CTR2"
 
 		'''l = enumerate(os.listdir("/home/nvdia/kernel_panic/core/config_data/classes_odp"))
 		l = [(x[0] + 1, x[1]) for x in l]
@@ -221,6 +239,7 @@ class DataWriter(object):
 			self.f_mat.close()
 			self.f_cla.close()
 			self.r.set("POWER_SWITCH", "KILL")
+			#print >>sys.stderr, "KILLED"
 			return item
 
 		self.writeURL(item)
@@ -228,6 +247,7 @@ class DataWriter(object):
 		self.writeWebMatrix(item)
 		#self.writeClasses(item)
 		self.r.incr(self.PROCESSED_CTR, 1)
+
 		return item
 
 	def writeURL(self, item):

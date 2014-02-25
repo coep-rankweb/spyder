@@ -16,7 +16,7 @@ class GoogleSpider(CrawlSpider):
 	name = "google"
 	allowed_domains = []
 
-	start_urls = ["http://www.historylearningsite.co.uk/index.htm", "http://www.forbes.com/economics-finance/", "http://www.mit.edu/", "http://www.smithsonianmag.com/", "http://edition.cnn.com/", "http://www.engadget.com/", "http://www.amazon.com/", "http://espn.go.com/", "http://www.tlc.com/"] 
+	start_urls = ["http://www.forbes.com/economics-finance/", "http://www.stanford.edu/", "http://www.smithsonianmag.com/", "http://edition.cnn.com/", "http://www.microsoft.com/en-us/default.aspx", "http://www.amazon.com/", "http://espn.go.com/", "http://www.tlc.com/", "http://www.microsoft.com/en-us/default.aspx"] 
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
 	)

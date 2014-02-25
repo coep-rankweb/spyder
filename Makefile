@@ -1,4 +1,4 @@
-FLAGS = -s JOBDIR=data/google_spider --nolog
+FLAGS = -s JOBDIR=data/google_spider
 #FLAGS =
 
 reset:

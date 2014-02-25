@@ -18,7 +18,11 @@ class NoFilter(BaseDupeFilter):
 		return cls(job_dir(settings))
 
 	def request_seen(self, request):
-		if self.r.get("%s:%s" % (self.URL2ID, hashxx(request.url))):
+		#print "filter:", request.url
+		uid = self.r.get("%s:%s" % (self.URL2ID, hashxx(request.url)))
+		if not uid or int(uid) > 0:
+			pass
+		else:
 			log.msg("FILTER SEEN:%s" % request.url, level = log.CRITICAL)
 			return True
 

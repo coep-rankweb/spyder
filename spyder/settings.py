@@ -10,9 +10,9 @@ BOT_NAME = 'spyder'
 
 SPIDER_MODULES = ['spyder.spiders']
 NEWSPIDER_MODULE = 'spyder.spiders'
-CONCURRENT_REQUESTS = 100
+#CONCURRENT_REQUESTS = 100
 
-LOG_LEVEL = 'CRITICAL'
+LOG_LEVEL = 'DEBUG'
 LOG_FILE = 'data/log.txt'
 
 DEPTH_LEVEL = 3

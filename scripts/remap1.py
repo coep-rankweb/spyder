@@ -34,9 +34,9 @@ for i, line in enumerate(oldf):
 	if i % 10000 == 0:
 		print "Matrix file:", i
 	row, col, val = line.strip().split()
-	u = r.get("N:ID2URL:" + row)
+	u = r.get("N:URL2ID:" + row)
 	if u:
-		v = r.get("N:ID2URL:" + col)
+		v = r.get("N:URL2ID:" + col)
 		if v:
 			newf.write("%s\t%s\t%s\n" % (u, v, val))
 			num_edges += 1

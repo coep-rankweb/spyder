@@ -1,9 +1,9 @@
-from subprocess import Popen, PIPE
 import smtplib
 import time
 import sys
+import psutil
 
-def sendMail(body):
+def sendMail(body = "FAILED"):
 	 to = 'add.harry@gmail.com'
 	 gmail_user = 'js128793817@gmail.com'
 	 gmail_pwd = 'abcd1234!@#$'
@@ -19,6 +19,10 @@ def sendMail(body):
 	 sys.stderr.write('done!\n')
 	 smtpserver.close()
 
+if not any(["scrapy" in i.name for i in psutil.process_iter()]):
+	sendMail("shutting down!")
+	sys.exit(1)
 
 s = "\n".join(sys.stdin)
 sendMail(s)
+sys.exit(0)

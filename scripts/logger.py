@@ -1,8 +1,10 @@
-from subprocess import Popen, PIPE
 import smtplib
 import time
 import redis
 import sys
+import psutil
+
+sys.exit(1)
 
 def sendMail(body = "FAILED"):
 	 to = 'add.harry@gmail.com'
@@ -24,11 +26,10 @@ r = redis.Redis()
 
 
 s = "\n".join(sys.stdin)
-p1 = Popen(["ps", "-eF"], stdout = PIPE)
-p2 = Popen(["grep", "scrapy"], stdin = p1.stdout, stdout = PIPE)
-out = p2.communicate()[0]
 
-if out.find("/usr/bin/python") == -1 and not r.get("USER_PROMPTED"):
-	sendMail()
-	r.set("USER_PROMPTED", "Y")
+if not any(["scrapy" in i.name for i in psutil.process_iter()]):
+	sendMail("shutting down!")
+	sys.exit(1)
+
 sendMail(s)
+sys.exit(0)
