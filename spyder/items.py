@@ -8,6 +8,7 @@ from scrapy.item import Item, Field
 class WebItem(Item):
 	title = Field()
 	url = Field()
+	url_id = Field()
 	extracted_text = Field()
 	meta_description = Field()
 	link_set = Field()

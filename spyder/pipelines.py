@@ -21,14 +21,9 @@ class DuplicatesFilter(object):
 	def __init__(self):
 		self.r = Datastore()
 		self.URL2ID = "URL2ID"
-		self.ID2URL = "ID2URL"
-		self.URL_SET = "URL_SET"
-		self.URL_CTR = "URL_CTR"
-		self.PROCESSED_CTR = "PROCESSED_CTR1"
 		self.MEM_THRESHOLD = 10 * (10 ** 9)
 		self.redis_process = None
 		self.scrapy_process = None
-		#self.r.set(self.URL_CTR, -1)
 
 		for i in psutil.process_iter():
 			if i.name.find("redis-server") >= 0:
@@ -39,8 +34,6 @@ class DuplicatesFilter(object):
 	def process_item(self, item, spider):
 		if not item:
 			raise DropItem
-
-		#print "DuplicatesFilter:", item['url']
 
 		if self.redis_process.get_memory_info().rss + self.scrapy_process.get_memory_info().rss > self.MEM_THRESHOLD:
 			self.r.set("POWER_SWITCH", "OFF")
@@ -56,44 +49,13 @@ class DuplicatesFilter(object):
 		return item
 
 	def buildURLIndex(self, item):
-		'''
-		Assign id to current url
-		Each link's url is assigned an ID and vice versa
 
-		This stage will only be reached if the 'if' condition in nofilter.py fails and the function returns true.
-		The only way the 'if' condition fails is if the url_id of this item's url exists and is negative (=> uit has been processed before)
-
-		Thus, either the url has been assigned an id or it hasnt. If it has, negate its current id . If it hasnt, get a new id from URL_CTR, negate it and assign it to this url. Finally, change URL2ID, ID2URL correspondingly in either case.
-
-		Ultimately,
-		+ve id => assigned id but not processed
-		-ve id => assigned id and processed
-		no id => not assigned id and not processed
-		'''
 		hashed_url = hashxx(item['url'])
 		url_id = self.r.get("%s:%s" % (self.URL2ID, hashed_url))
 
-		if not url_id:
-			#if self.r.sismember (self.URL_SET, url_id):
-			#	print "Already present"
-			url_id = -1 * self.r.incr(self.URL_CTR, 1)
-		else:
-			self.r.delete("%s:%s" % (self.ID2URL, url_id))
-			self.r.srem(self.URL_SET, url_id)
-			url_id = -1 * int(url_id)
+		assert url_id != None
 
-		self.r.sadd(self.URL_SET, url_id)
-		self.r.set("%s:%d" % (self.ID2URL, url_id), item['url'])
-		self.r.set("%s:%s" % (self.URL2ID, hashed_url), url_id)
-
-		self.r.incr(self.PROCESSED_CTR, 1)
-		for link in item['link_set']:
-			hashed_link = hashxx(link)
-			if not self.r.get("%s:%s" % (self.URL2ID, hashed_link)):
-				new_url_id = self.r.incr(self.URL_CTR, 1)
-				self.r.sadd(self.URL_SET, new_url_id)
-				self.r.set("%s:%s" % (self.URL2ID, hashed_link), new_url_id)
-				self.r.set("%s:%d" % (self.ID2URL, new_url_id), link)
+		item['url_id'] = -1 * int(url_id)
 
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
@@ -140,8 +102,6 @@ class KeywordExtractor(object):
 		if item['shutdown']:
 			return item
 
-		print item['url']
-
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
 		words = [self.clean(x) for x in nltk.wordpunct_tokenize(text)]
 		item['ordered_words'] = words
@@ -161,7 +121,8 @@ class KeywordExtractor(object):
 		For each word in current url's text,
 			add the url to the set of urls which contain that word
 		'''
-		url_id = self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url'])))
+		url_id = item['url_id']
+		#url_id = self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url'])))
 		word_id = ""
 		for word in item['words']:
 			if self.r.sadd(self.WORD_SET, word):
@@ -224,9 +185,10 @@ class DataWriter(object):
 		self.f_cla = open("data/classes.txt", "a+")
 		self.r = Datastore()
 
+		self.URL_SET = "URL_SET"
 		self.URL2ID = "URL2ID"
 		self.ID2URL = "ID2URL"
-		self.PROCESSED_CTR = "PROCESSED_CTR2"
+		self.PROCESSED_CTR = "PROCESSED_CTR"
 
 		'''l = enumerate(os.listdir("/home/nvdia/kernel_panic/core/config_data/classes_odp"))
 		l = [(x[0] + 1, x[1]) for x in l]
@@ -246,7 +208,12 @@ class DataWriter(object):
 		self.writeKeywords(item)
 		self.writeWebMatrix(item)
 		#self.writeClasses(item)
+
+		url_id = item['url_id']
+		self.r.srem(self.URL_SET, -1 * url_id)
+		self.r.sadd(self.URL_SET, url_id)
 		self.r.incr(self.PROCESSED_CTR, 1)
+		print item['url']
 
 		return item
 
@@ -262,10 +229,10 @@ class DataWriter(object):
 		'''
 		Builds web graph in matrix market format file
 		'''
-		u = self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url'])))
+		u = hashxx(item['url'])
 		v = 0
 		for link in set(item['link_set']):
-			v = self.r.get("%s:%s" % (self.URL2ID, hashxx(link)))
+			v = hashxx(link)
 			self.f_mat.write("%s\t%s\t1\n" % (u, v))
 
 	def writeClasses(self, item):
