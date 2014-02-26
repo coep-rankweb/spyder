@@ -11,16 +11,10 @@ from pyhashxx import hashxx
 import psutil
 
 
-class DuplicatesFilter(object):
-	'''
-	Filters duplicate urls
-	Assigns each url a unique id
-	Sets url -> id and id -> url in redis
-	Indexes inlinks and outlinks
-	'''
+class GateKeeper(object):
 	def __init__(self):
 		self.r = Datastore()
-		self.URL2ID = "URL2ID"
+		self.HASH2URL = "HASH2URL"
 		self.MEM_THRESHOLD = 10 * (10 ** 9)
 		self.redis_process = None
 		self.scrapy_process = None
@@ -35,7 +29,8 @@ class DuplicatesFilter(object):
 		if not item:
 			raise DropItem
 
-		if self.redis_process.get_memory_info().rss + self.scrapy_process.get_memory_info().rss > self.MEM_THRESHOLD:
+		if self.redis_process.get_memory_info().rss \
+			+ self.scrapy_process.get_memory_info().rss > self.MEM_THRESHOLD:
 			self.r.set("POWER_SWITCH", "OFF")
 			item['shutdown'] = True
 
@@ -44,23 +39,15 @@ class DuplicatesFilter(object):
 
 		if not item['link_set']:
 			raise DropItem
-		else:
-			self.buildURLIndex(item)
+
+		item['url_id'] = hashxx(item['url'])
+		self.r.set("%s:%s" % (self.HASH2URL, item['url_id']), item['url'])
 		return item
-
-	def buildURLIndex(self, item):
-
-		hashed_url = hashxx(item['url'])
-		url_id = self.r.get("%s:%s" % (self.URL2ID, hashed_url))
-
-		assert url_id != None
-
-		item['url_id'] = -1 * int(url_id)
 
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
 	def __init__(self):
-		self.adult_blacklist = ['sex', 'porn', 'xxx', 'fuck', 'nude']
+		self.adult_blacklist = ['porn', 'xxx', 'fuck', 'nude']
 		pass
 
 	def process_item(self, item, spider):
@@ -79,6 +66,7 @@ class TextExtractor(object):
 		lower_extracted_text = item['extracted_text'].lower()
 		for b in self.adult_blacklist:
 			if b in lower_extracted_text:
+				log.msg("EXPLICIT:%s" % item['url'], level = log.CRITICAL)
 				raise DropItem
 		return item
 
@@ -89,7 +77,6 @@ class KeywordExtractor(object):
 	'''
 	def __init__(self):
 		self.r = Datastore()
-		self.URL2ID = "URL2ID"
 		self.WORD_SET = "WORD_SET"
 		self.WORD2ID = "WORD2ID"
 		self.WORD_IN = "WORD_IN"
@@ -122,7 +109,6 @@ class KeywordExtractor(object):
 			add the url to the set of urls which contain that word
 		'''
 		url_id = item['url_id']
-		#url_id = self.r.get("%s:%s" % (self.URL2ID, hashxx(item['url'])))
 		word_id = ""
 		for word in item['words']:
 			if self.r.sadd(self.WORD_SET, word):
@@ -185,14 +171,7 @@ class DataWriter(object):
 		self.f_cla = open("data/classes.txt", "a+")
 		self.r = Datastore()
 
-		self.URL_SET = "URL_SET"
-		self.URL2ID = "URL2ID"
-		self.ID2URL = "ID2URL"
-		self.PROCESSED_CTR = "PROCESSED_CTR"
-
-		'''l = enumerate(os.listdir("/home/nvdia/kernel_panic/core/config_data/classes_odp"))
-		l = [(x[0] + 1, x[1]) for x in l]
-		self.classes = dict(l)'''
+		self.PROCESSED_SET = "PROCESSED_SET"
 
 	def process_item(self, item, spider):
 		if item['shutdown']:
@@ -209,12 +188,8 @@ class DataWriter(object):
 		self.writeWebMatrix(item)
 		#self.writeClasses(item)
 
-		url_id = item['url_id']
-		self.r.srem(self.URL_SET, -1 * url_id)
-		self.r.sadd(self.URL_SET, url_id)
-		self.r.incr(self.PROCESSED_CTR, 1)
+		self.r.sadd(self.PROCESSED_SET, item['url_id'])
 		print item['url']
-
 		return item
 
 	def writeURL(self, item):
@@ -229,7 +204,7 @@ class DataWriter(object):
 		'''
 		Builds web graph in matrix market format file
 		'''
-		u = hashxx(item['url'])
+		u = item['url_id']
 		v = 0
 		for link in set(item['link_set']):
 			v = hashxx(link)

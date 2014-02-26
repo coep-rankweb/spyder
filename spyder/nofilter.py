@@ -11,9 +11,6 @@ class NoFilter(BaseDupeFilter):
 
 	def __init__(self, path=None):
 		self.r = Datastore()
-		self.URL_CTR = "URL_CTR"
-		self.URL2ID = "URL2ID"
-		self.ID2URL = "ID2URL"
 		self.URL_SET = "URL_SET"
 
 	@classmethod
@@ -21,13 +18,8 @@ class NoFilter(BaseDupeFilter):
 		return cls(job_dir(settings))
 
 	def request_seen(self, request):
-		#print "filter:", request.url
-		uid = self.r.get("%s:%s" % (self.URL2ID, hashxx(request.url)))
-		if not uid:
-			uid = self.r.incr(self.URL_CTR, 1)
-			self.r.set("%s:%s" % (self.ID2URL, uid), request.url)
-			self.r.set("%s:%s" % (self.URL2ID, hashxx(request.url)), uid)
-			self.r.sadd(self.URL_SET, uid)
+		if self.r.sadd(self.URL_SET, hashxx(request.url)) == 1:
+			return None
 		else:
 			log.msg("FILTER SEEN:%s" % request.url, level = log.CRITICAL)
 			return True

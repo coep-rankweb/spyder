@@ -34,7 +34,7 @@ DOWNLOADER_MIDDLEWARES = {
 }
 
 ITEM_PIPELINES = {
-	'spyder.pipelines.DuplicatesFilter': 1,
+	'spyder.pipelines.GateKeeper': 1,
 	'spyder.pipelines.TextExtractor': 2,
 	'spyder.pipelines.KeywordExtractor': 3,
 	'spyder.pipelines.Analytics': 4,
