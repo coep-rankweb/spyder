@@ -9,6 +9,7 @@ from unidecode import unidecode
 from timer import timeit
 from pyhashxx import hashxx
 import psutil
+import shelve
 
 
 class GateKeeper(object):
@@ -18,6 +19,8 @@ class GateKeeper(object):
 		self.MEM_THRESHOLD = 10 * (10 ** 9)
 		self.redis_process = None
 		self.scrapy_process = None
+
+		#self.shelf = shelve.open("data/hashurl.shelf")
 
 		for i in psutil.process_iter():
 			if i.name.find("redis-server") >= 0:
@@ -35,6 +38,7 @@ class GateKeeper(object):
 			item['shutdown'] = True
 
 		if item['shutdown']:
+			#self.shelf.close()
 			return item
 
 		if not item['link_set']:
@@ -42,6 +46,7 @@ class GateKeeper(object):
 
 		item['url_id'] = hashxx(item['url'])
 		self.r.set("%s:%s" % (self.HASH2URL, item['url_id']), item['url'])
+		#self.shelf[str(item['url_id'])] = item['url']
 		return item
 
 class TextExtractor(object):
@@ -78,15 +83,18 @@ class KeywordExtractor(object):
 	def __init__(self):
 		self.r = Datastore()
 		self.WORD_SET = "WORD_SET"
-		self.WORD2ID = "WORD2ID"
+		#self.WORD2ID = "WORD2ID"
 		self.WORD_IN = "WORD_IN"
 		self.WORD_CTR = "WORD_CTR"
 		#self.r.set(self.WORD_CTR, -1)
 		self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set([self.clean(x) for x in nltk.corpus.stopwords.words('english')])
 
+		self.shelf = shelve.open("data/word.shelf")
+
 	def process_item(self, item, spider):
 		if item['shutdown']:
+			self.shelf.close()
 			return item
 
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
@@ -113,9 +121,11 @@ class KeywordExtractor(object):
 		for word in item['words']:
 			if self.r.sadd(self.WORD_SET, word):
 				word_id = str(self.r.incr(self.WORD_CTR, 1))
-				self.r.set("%s:%s" % (self.WORD2ID, word), word_id)
+				self.shelf[word] = word_id
+				#self.r.set("%s:%s" % (self.WORD2ID, word), word_id)
 			else:
-				word_id = self.r.get("%s:%s" % (self.WORD2ID, word))
+				word_id = self.shelf[word]
+				#word_id = self.r.get("%s:%s" % (self.WORD2ID, word))
 			self.r.sadd("%s:%s" % (self.WORD_IN, word_id), url_id)
 
 	def clean(self, s):
@@ -148,7 +158,6 @@ class Analytics(object):
 			self.r.incr("%s:%s:%s" % (self.DIGRAM, w0, w1), 1)
 		return item
 
-
 class PageClassifier(object):
 	def __init__(self):
 		self.w = WebClassifier()
@@ -167,7 +176,8 @@ class DataWriter(object):
 	def __init__(self):
 		self.f_url = open("data/url.txt", "a+")
 		self.f_key = open("data/keywords.txt", "a+")
-		self.f_mat = open("data/matrix.mtx", "a+")
+		self.f_omat = open("data/out_matrix.mtx", "a+")
+		self.f_imat = open("data/in_matrix.mtx", "a+")
 		self.f_cla = open("data/classes.txt", "a+")
 		self.r = Datastore()
 
@@ -177,7 +187,8 @@ class DataWriter(object):
 		if item['shutdown']:
 			self.f_url.close()
 			self.f_key.close()
-			self.f_mat.close()
+			self.f_imat.close()
+			self.f_omat.close()
 			self.f_cla.close()
 			self.r.set("POWER_SWITCH", "KILL")
 			#print >>sys.stderr, "KILLED"
@@ -208,7 +219,8 @@ class DataWriter(object):
 		v = 0
 		for link in set(item['link_set']):
 			v = hashxx(link)
-			self.f_mat.write("%s\t%s\t1\n" % (u, v))
+			self.f_omat.write("%s\t%s\t1\n" % (u, v))
+			self.f_imat.write("%s\t%s\t1\n" % (v, u))
 
 	def writeClasses(self, item):
 		self.f_cla.write("%s:%s\n" % (item['title'], self.classes[item['predict'][0]]))

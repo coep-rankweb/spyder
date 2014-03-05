@@ -21,7 +21,7 @@ class NoFilter(BaseDupeFilter):
 		if self.r.sadd(self.URL_SET, hashxx(request.url)) == 1:
 			return None
 		else:
-			log.msg("FILTER SEEN:%s" % request.url, level = log.CRITICAL)
+			#log.msg("FILTER SEEN:%s" % request.url, level = log.CRITICAL)
 			return True
 
 	def close(self, reason):

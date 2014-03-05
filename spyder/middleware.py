@@ -15,9 +15,11 @@ class RequestsLimiter(object):
 		self.DOMAIN = "DOMAIN"
 		self.LIMIT = 200
 		self.DOMAIN_SET = "DOMAIN_SET"
+		self.MAX_URL_LENGTH = 512
 
 	def process_request(self, request, spider):
 		try:
+			if len(request.url) > self.MAX_URL_LENGTH: raise IgnoreRequest
 			domain = urlparse(request.url).hostname
 			if int(self.r.get(self.DOMAIN + ":" + domain) or 0) < self.LIMIT:
 				self.r.sadd(self.DOMAIN_SET, domain)
@@ -32,7 +34,7 @@ class RequestsLimiter(object):
 
 	def process_response(self, request, response, spider):
 		try:
-
+			if response.status != 200: raise IgnoreRequest
 			if 'text/html' not in response.headers['Content-Type'] and 'text/plain' not in response.headers['Content-Type']:
 				log.msg("Non-HTML/Plain:%s" % request.url, level=log.CRITICAL)
 				raise IgnoreRequest

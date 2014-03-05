@@ -16,10 +16,13 @@ class GoogleSpider(CrawlSpider):
 	name = "google"
 	allowed_domains = []
 
-	start_urls = ["http://www.forbes.com/economics-finance/", "http://www.stanford.edu/", "http://www.smithsonianmag.com/", "http://edition.cnn.com/", "http://www.microsoft.com/en-us/default.aspx", "http://www.amazon.com/", "http://espn.go.com/", "http://www.tlc.com/", "http://www.microsoft.com/en-us/default.aspx"] 
+	#start_urls = ["http://www.forbes.com/economics-finance/", "http://www.stanford.edu/", "http://www.smithsonianmag.com/", "http://edition.cnn.com/", "http://www.microsoft.com/en-us/default.aspx", "http://www.amazon.com/", "http://espn.go.com/", "http://www.tlc.com/", "http://www.microsoft.com/en-us/default.aspx"] 
+	start_urls = ["http://www.engadget.com", "http://www.un.org/en/", "http://www.cartoonnetwork.com/", "http://www.nationalgeographic.com/", "http://edition.cnn.com/", "http://espn.go.com/", "http://www.stanford.edu"]
+
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
 	)
+
 	r = Datastore()
 
 	def process(self, response):
@@ -49,7 +52,7 @@ class GoogleSpider(CrawlSpider):
 				rel_links = sel.xpath('//a/@href').extract()
 				for l in rel_links:
 					link = urljoin(response.url, l)
-					if urlparse(link).scheme in ['http', 'https']:
+					if urlparse(link).scheme in ['http', 'https'] and len(link) <= 512:
 						abs_links.add(self.clean(link))
 				item['link_set'] = abs_links
 

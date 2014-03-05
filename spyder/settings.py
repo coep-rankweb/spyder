@@ -12,6 +12,7 @@ SPIDER_MODULES = ['spyder.spiders']
 NEWSPIDER_MODULE = 'spyder.spiders'
 #CONCURRENT_REQUESTS = 100
 
+#LOG_LEVEL = 'DEBUG'
 LOG_LEVEL = 'CRITICAL'
 LOG_FILE = 'data/log.txt'
 
@@ -37,7 +38,7 @@ ITEM_PIPELINES = {
 	'spyder.pipelines.GateKeeper': 1,
 	'spyder.pipelines.TextExtractor': 2,
 	'spyder.pipelines.KeywordExtractor': 3,
-	'spyder.pipelines.Analytics': 4,
+	#'spyder.pipelines.Analytics': 4,
 	#'spyder.pipelines.PageClassifier': 5,
 	'spyder.pipelines.DataWriter': 6
 }
