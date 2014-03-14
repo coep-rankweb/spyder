@@ -16,7 +16,7 @@ keyword_file = os.path.join(base, "data/keywords.txt")
 DOC_VECTOR = "URL_VECTOR"
 WORD2ID = "WORD2ID"
 
-r = redis.Redis()
+r = redis.Redis("10.1.99.15")
 s = shelve.open(os.path.join(base, "data/word.shelf"))
 
 i = 0

@@ -23,10 +23,10 @@ class GoogleSpider(CrawlSpider):
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
 	)
 
-	r = Datastore()
+	remote_r = Datastore("10.1.99.15")
 
 	def process(self, response):
-		status = self.r.get("POWER_SWITCH")
+		status = self.remote_r.get("POWER_SWITCH")
 		item = WebItem()
 		if status == "KILL":
 			raise CloseSpider("shutdown")

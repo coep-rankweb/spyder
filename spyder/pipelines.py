@@ -14,7 +14,7 @@ import shelve
 
 class GateKeeper(object):
 	def __init__(self):
-		self.r = Datastore()
+		self.remote_r = Datastore("10.1.99.15")
 		self.HASH2URL = "HASH2URL"
 		self.MEM_THRESHOLD = 10 * (10 ** 9)
 		self.redis_process = None
@@ -34,7 +34,7 @@ class GateKeeper(object):
 
 		if self.redis_process.get_memory_info().rss \
 			+ self.scrapy_process.get_memory_info().rss > self.MEM_THRESHOLD:
-			self.r.set("POWER_SWITCH", "OFF")
+			self.remote_r.set("POWER_SWITCH", "OFF")
 			item['shutdown'] = True
 
 		if item['shutdown']:
@@ -45,7 +45,7 @@ class GateKeeper(object):
 			raise DropItem
 
 		item['url_id'] = hashxx(item['url'])
-		self.r.set("%s:%s" % (self.HASH2URL, item['url_id']), item['url'])
+		self.remote_r.set("%s:%s" % (self.HASH2URL, item['url_id']), item['url'])
 		#self.shelf[str(item['url_id'])] = item['url']
 		return item
 
@@ -81,7 +81,8 @@ class KeywordExtractor(object):
 	Extracts keywords from title, extracted_text, meta_description
 	'''
 	def __init__(self):
-		self.r = Datastore()
+		self.local_r = Datastore()
+		self.remote_r = Datastore("10.1.99.15")
 		self.WORD_SET = "WORD_SET"
 		#self.WORD2ID = "WORD2ID"
 		self.WORD_IN = "WORD_IN"
@@ -119,14 +120,14 @@ class KeywordExtractor(object):
 		url_id = item['url_id']
 		word_id = ""
 		for word in item['words']:
-			if self.r.sadd(self.WORD_SET, word):
-				word_id = str(self.r.incr(self.WORD_CTR, 1))
+			if self.remote_r.sadd(self.WORD_SET, word):
+				word_id = str(self.remote_r.incr(self.WORD_CTR, 1))
 				self.shelf[word] = word_id
 				#self.r.set("%s:%s" % (self.WORD2ID, word), word_id)
 			else:
 				word_id = self.shelf[word]
 				#word_id = self.r.get("%s:%s" % (self.WORD2ID, word))
-			self.r.sadd("%s:%s" % (self.WORD_IN, word_id), url_id)
+			self.local_r.sadd("%s:%s" % (self.WORD_IN, word_id), url_id)
 
 	def clean(self, s):
 		return self.stemmer.stem(s.lower())
@@ -179,7 +180,7 @@ class DataWriter(object):
 		self.f_omat = open("data/out_matrix.mtx", "a+")
 		self.f_imat = open("data/in_matrix.mtx", "a+")
 		self.f_cla = open("data/classes.txt", "a+")
-		self.r = Datastore()
+		self.remote_r = Datastore("10.1.99.15")
 
 		self.PROCESSED_SET = "PROCESSED_SET"
 
@@ -190,7 +191,7 @@ class DataWriter(object):
 			self.f_imat.close()
 			self.f_omat.close()
 			self.f_cla.close()
-			self.r.set("POWER_SWITCH", "KILL")
+			self.remote_r.set("POWER_SWITCH", "KILL")
 			#print >>sys.stderr, "KILLED"
 			return item
 
@@ -199,8 +200,8 @@ class DataWriter(object):
 		self.writeWebMatrix(item)
 		#self.writeClasses(item)
 
-		self.r.sadd(self.PROCESSED_SET, item['url_id'])
-		print item['url']
+		self.remote_r.sadd(self.PROCESSED_SET, item['url_id'])
+		#print item['url']
 		return item
 
 	def writeURL(self, item):

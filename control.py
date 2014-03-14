@@ -1,9 +1,12 @@
 import redis
 
-r = redis.Redis()
+remote_r = redis.Redis("10.1.99.15")
+local_r = redis.Redis()
 
-def reset(): r.flushdb()
+def reset():
+	remote_r.flushdb()
+	local_r.flushdb()
 
-def on(): r.set("POWER_SWITCH", "ON")
+def on(): remote_r.set("POWER_SWITCH", "ON")
 
-def off(): r.set("POWER_SWITCH", "OFF")
+def off(): remote_r.set("POWER_SWITCH", "OFF")

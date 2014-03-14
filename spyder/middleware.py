@@ -10,8 +10,7 @@ import base64
 
 class RequestsLimiter(object):
 	def __init__(self):
-		self.r = Datastore()
-		#self.r.flushdb()
+		self.remote_r = Datastore("10.1.99.15")
 		self.DOMAIN = "DOMAIN"
 		self.LIMIT = 200
 		self.DOMAIN_SET = "DOMAIN_SET"
@@ -21,9 +20,9 @@ class RequestsLimiter(object):
 		try:
 			if len(request.url) > self.MAX_URL_LENGTH: raise IgnoreRequest
 			domain = urlparse(request.url).hostname
-			if int(self.r.get(self.DOMAIN + ":" + domain) or 0) < self.LIMIT:
-				self.r.sadd(self.DOMAIN_SET, domain)
-				self.r.incr(self.DOMAIN + ":" + domain, 1)
+			if int(self.remote_r.get(self.DOMAIN + ":" + domain) or 0) < self.LIMIT:
+				self.remote_r.sadd(self.DOMAIN_SET, domain)
+				self.remote_r.incr(self.DOMAIN + ":" + domain, 1)
 				return None
 			else:
 				log.msg("DOMAIN limit Crossed:%s" % request.url, level=log.CRITICAL)

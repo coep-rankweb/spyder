@@ -10,7 +10,7 @@ class NoFilter(BaseDupeFilter):
 	"""Request Fingerprint duplicates filter"""
 
 	def __init__(self, path=None):
-		self.r = Datastore()
+		self.remote_r = Datastore("10.1.99.15")
 		self.URL_SET = "URL_SET"
 
 	@classmethod
@@ -18,7 +18,7 @@ class NoFilter(BaseDupeFilter):
 		return cls(job_dir(settings))
 
 	def request_seen(self, request):
-		if self.r.sadd(self.URL_SET, hashxx(request.url)) == 1:
+		if self.remote_r.sadd(self.URL_SET, hashxx(request.url)) == 1:
 			return None
 		else:
 			#log.msg("FILTER SEEN:%s" % request.url, level = log.CRITICAL)
