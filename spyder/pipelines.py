@@ -9,7 +9,7 @@ from timer import timeit
 from pyhashxx import hashxx
 from gib_detect import gib_detect
 import psutil
-import shelve
+#import shelve
 
 
 class GateKeeper(object):
@@ -17,22 +17,29 @@ class GateKeeper(object):
 		self.remote_r = Datastore("10.1.99.15")
 		self.HASH2URL = "HASH2URL"
 		self.MEM_THRESHOLD = 10 * (10 ** 9)
-		self.redis_process = None
-		self.scrapy_process = None
+		#self.redis_process = None
+		#self.scrapy_process = None
 
+		'''
 		for i in psutil.process_iter():
 			if i.name.find("redis-server") >= 0:
 				self.redis_process = i
 			if i.name.find("scrapy") >= 0:
 				self.scrapy_process = i
+		'''
 
 	def process_item(self, item, spider):
 		if not item:
 			raise DropItem
 
+		'''
 		if self.redis_process.get_memory_info().rss \
 			+ self.scrapy_process.get_memory_info().rss > self.MEM_THRESHOLD:
 			self.remote_r.set("POWER_SWITCH", "OFF")
+			item['shutdown'] = True
+		'''
+
+		if self.remote_r.scard("PROCESSED_SET") >= 200000:
 			item['shutdown'] = True
 
 		if item['shutdown']:
@@ -85,11 +92,11 @@ class KeywordExtractor(object):
 		self.WORD_CTR = "WORD_CTR"
 		self.stopwords = set([self.clean(x) for x in nltk.corpus.stopwords.words('english')])
 
-		self.shelf = shelve.open("data/word.shelf")
+		#self.shelf = shelve.open("data/word.shelf")
 
 	def process_item(self, item, spider):
 		if item['shutdown']:
-			self.shelf.close()
+			#self.shelf.close()
 			return item
 
 		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
@@ -97,7 +104,7 @@ class KeywordExtractor(object):
 		item['ordered_words'] = words
 		cleaned_words = set(words) - self.stopwords
 		cleaned_words = [self.clean(w) for w in cleaned_words if w.isalnum() and len(w) > 1 and not w.isdigit()]
-		item['words'] = filter(gib_detect, cleaned_words)
+		item['words'] = cleaned_words
 		if not item['words']:
 			raise DropItem
 
@@ -116,11 +123,11 @@ class KeywordExtractor(object):
 		for word in item['words']:
 			if self.remote_r.sadd(self.WORD_SET, word):
 				word_id = str(self.remote_r.incr(self.WORD_CTR, 1))
-				self.shelf[word] = word_id
-				#self.r.set("%s:%s" % (self.WORD2ID, word), word_id)
+				#self.shelf[word] = word_id
+				self.r.set("%s:%s" % (self.WORD2ID, word), word_id)
 			else:
-				word_id = self.shelf[word]
-				#word_id = self.r.get("%s:%s" % (self.WORD2ID, word))
+				#word_id = self.shelf[word]
+				word_id = self.r.get("%s:%s" % (self.WORD2ID, word))
 			self.local_r.sadd("%s:%s" % (self.WORD_IN, word_id), url_id)
 
 	def clean(self, s):

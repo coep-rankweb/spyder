@@ -5,7 +5,7 @@ from scrapy.selector import Selector
 import sys
 sys.path.append("../")
 from datastore import Datastore
-import langid
+#import langid
 import base64
 
 class RequestsLimiter(object):
@@ -38,9 +38,12 @@ class RequestsLimiter(object):
 				log.msg("Non-HTML/Plain:%s" % request.url, level=log.CRITICAL)
 				raise IgnoreRequest
 
+			'''
 			if langid.classify(response.body)[0] != 'en':
 				log.msg("Non-English:%s" % request.url, level=log.CRITICAL)
 				raise IgnoreRequest
+			'''
+
 		except KeyError:
 			log.msg("KeyError(Content-Type):%s" % request.url, level=log.CRITICAL)
 			raise IgnoreRequest

@@ -14,10 +14,11 @@ import traceback
 
 class GoogleSpider(CrawlSpider):
 	name = "google"
-	allowed_domains = []
+	allowed_domains = ["http://www.engadget.com/"]
+	start_urls = ["http://www.engadget.com/"]
 
 	#start_urls = ["http://www.forbes.com/economics-finance/", "http://www.stanford.edu/", "http://www.smithsonianmag.com/", "http://edition.cnn.com/", "http://www.microsoft.com/en-us/default.aspx", "http://www.amazon.com/", "http://espn.go.com/", "http://www.tlc.com/", "http://www.microsoft.com/en-us/default.aspx"] 
-	start_urls = ["http://www.engadget.com", "http://www.un.org/en/", "http://www.cartoonnetwork.com/", "http://www.nationalgeographic.com/", "http://edition.cnn.com/", "http://espn.go.com/", "http://www.stanford.edu"]
+	#start_urls = ["http://www.engadget.com", "http://www.un.org/en/", "http://www.cartoonnetwork.com/", "http://www.nationalgeographic.com/", "http://edition.cnn.com/", "http://espn.go.com/", "http://www.stanford.edu"]
 
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
