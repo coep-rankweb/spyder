@@ -1,13 +1,13 @@
 from scrapy import log
 import os, sys
 sys.path.append(os.path.abspath('../'))
-#from webclassifier import WebClassifier
 from datastore import Datastore
 from scrapy.exceptions import DropItem
 import nltk
 from unidecode import unidecode
 from timer import timeit
 from pyhashxx import hashxx
+from gib_detect import gib_detect
 import psutil
 import shelve
 
@@ -19,8 +19,6 @@ class GateKeeper(object):
 		self.MEM_THRESHOLD = 10 * (10 ** 9)
 		self.redis_process = None
 		self.scrapy_process = None
-
-		#self.shelf = shelve.open("data/hashurl.shelf")
 
 		for i in psutil.process_iter():
 			if i.name.find("redis-server") >= 0:
@@ -46,7 +44,6 @@ class GateKeeper(object):
 
 		item['url_id'] = hashxx(item['url'])
 		self.remote_r.set("%s:%s" % (self.HASH2URL, item['url_id']), item['url'])
-		#self.shelf[str(item['url_id'])] = item['url']
 		return item
 
 class TextExtractor(object):
@@ -84,11 +81,8 @@ class KeywordExtractor(object):
 		self.local_r = Datastore()
 		self.remote_r = Datastore("10.1.99.15")
 		self.WORD_SET = "WORD_SET"
-		#self.WORD2ID = "WORD2ID"
 		self.WORD_IN = "WORD_IN"
 		self.WORD_CTR = "WORD_CTR"
-		#self.r.set(self.WORD_CTR, -1)
-		self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set([self.clean(x) for x in nltk.corpus.stopwords.words('english')])
 
 		self.shelf = shelve.open("data/word.shelf")
@@ -103,7 +97,7 @@ class KeywordExtractor(object):
 		item['ordered_words'] = words
 		cleaned_words = set(words) - self.stopwords
 		cleaned_words = [self.clean(w) for w in cleaned_words if w.isalnum() and len(w) > 1 and not w.isdigit()]
-		item['words'] = cleaned_words
+		item['words'] = filter(gib_detect, cleaned_words)
 		if not item['words']:
 			raise DropItem
 
@@ -130,48 +124,8 @@ class KeywordExtractor(object):
 			self.local_r.sadd("%s:%s" % (self.WORD_IN, word_id), url_id)
 
 	def clean(self, s):
-		return self.stemmer.stem(s.lower())
+		return s.lower()
 
-
-class Analytics(object):
-	def __init__(self):
-		self.r = Datastore()
-		self.DIGRAM = "DIGRAM"
-		self.WORD2ID = "WORD2ID"
-		self.TOP_N = 5
-		self.bgm = nltk.collocations.BigramAssocMeasures
-		self.SCORER_FN = self.bgm.likelihood_ratio
-
-	def process_item(self, item, spider):
-		if item['shutdown']:
-			return item
-
-		item = self.markov(item)
-		return item
-
-	def markov(self, item):
-		finder = nltk.collocations.BigramCollocationFinder.from_words(item['ordered_words'])
-		digrams = finder.nbest(self.SCORER_FN, self.TOP_N)
-
-		for digram in digrams:
-			w0 = self.r.get("%s:%s" % (self.WORD2ID, digram[0]))
-			w1 = self.r.get("%s:%s" % (self.WORD2ID, digram[1]))
-			self.r.incr("%s:%s:%s" % (self.DIGRAM, w0, w1), 1)
-		return item
-
-class PageClassifier(object):
-	def __init__(self):
-		self.w = WebClassifier()
-		self.w.loadClassifier()
-
-	def process_item(self, item, spider):
-		if item['shutdown']:
-			return item
-
-		result = self.w.test([item['words']])
-		item['proba'] = result['predict_proba']
-		item['predict'] = result['predict']
-		return item
 
 class DataWriter(object):
 	def __init__(self):
@@ -192,16 +146,13 @@ class DataWriter(object):
 			self.f_omat.close()
 			self.f_cla.close()
 			self.remote_r.set("POWER_SWITCH", "KILL")
-			#print >>sys.stderr, "KILLED"
 			return item
 
 		self.writeURL(item)
 		self.writeKeywords(item)
 		self.writeWebMatrix(item)
-		#self.writeClasses(item)
 
 		self.remote_r.sadd(self.PROCESSED_SET, item['url_id'])
-		#print item['url']
 		return item
 
 	def writeURL(self, item):
