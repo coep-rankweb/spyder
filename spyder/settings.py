@@ -17,16 +17,23 @@ LOG_FILE = 'data/log.txt'
 
 DEPTH_LEVEL = 3
 
+COOKIES_ENABLED = False
+RETRY_ENABLED = False
+DOWNLOAD_TIMEOUT = 20
+REDIRECT_ENABLED = False
+AJAXCRAWL_ENABLED = True
+DUPEFILTER_CLASS = 'spyder.dupefilter.DupeFilter'
+
 DOWNLOADER_MIDDLEWARES = {
 	'scrapy.contrib.downloadermiddleware.robotstxt.RobotsTxtMiddleware':541,
 	'spyder.middleware.RequestsLimiter': 543,
 }
 
 ITEM_PIPELINES = {
-	'spyder.pipelines.DuplicatesFilter': 1,
+	'spyder.pipelines.Gatekeeper': 1,
 	'spyder.pipelines.TextExtractor': 2,
 	'spyder.pipelines.KeywordExtractor': 3,
-	'spyder.pipelines.Analytics': 4
+	#'spyder.pipelines.Analytics': 4
 }
 
 #DEPTH_PRIORITY = 1

@@ -2,15 +2,16 @@ FLAGS =
 clear:
 	make reset && make init && make on
 reset:
+	redis-cli flushdb
 	python -c 'from control import *; reset();'
-	rm -f spyder/*.pyc
-	rm -f spyder/spiders/*.pyc
-	rm -f scripts/*.pyc
-	rm -f data/*
+	rm -rf spyder/*.pyc
+	rm -rf spyder/spiders/*.pyc
+	rm -rf scripts/*.pyc
+	rm -rf data/*
 
 crawl:
 	rm -f *.pyc
-	scrapy crawl google $(FLAGS)
+	scrapy crawl google $(FLAGS) 2> data/timelog
 
 init:
 	python -c 'import control; control.init();'

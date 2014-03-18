@@ -21,6 +21,8 @@ class RequestsLimiter(object):
 		self.d = self.db[DOMAIN_DATA]
 
 	def process_request(self, request, spider):
+		return None
+
 		domain = urlparse(request.url).hostname
 		self.d.update({'domain': domain}, {"$inc": {"freq": 1}}, upsert = True)
 		res = self.d.find_one({'domain': domain})

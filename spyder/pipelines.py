@@ -19,14 +19,14 @@ else: db = r[DB_NAME]
 u = db[URL_DATA]
 w = db[WORD_DATA]
 c = db[CRAWLER_DATA]
-co = db[COLLOCATIONS_DATA]
-f = db[FREQ_DATA]
+#co = db[COLLOCATIONS_DATA]
+#f = db[FREQ_DATA]
 
 u.create_index('url')
 w.create_index('word')
-co.create_index('base')
+#co.create_index('base')
 
-class DuplicatesFilter(object):
+class Gatekeeper(object):
 	'''
 	Filters duplicate urls
 	Assigns each url a unique id
@@ -34,16 +34,14 @@ class DuplicatesFilter(object):
 	Indexes inlinks and outlinks
 	'''
 	def __init__(self):
-		self.URL_CTR = itertools.count()
+		self.URL_CTR = itertools.count(1)
 
 	#@timeit("DuplicatesFilter")
 	@throttle
 	def process_item(self, item, spider):
-		if u.find_one({'url': item['url']}): #duplicate
-			raise DropItem
-		else: #process new item
-			self.buildURLIndex(item)
-
+		if c.find_one({'spider': 'google'})['processed_ctr'] > 200000:
+			item['shutdown'] = True
+		self.buildURLIndex(item)
 		return item
 
 	def buildURLIndex(self, item):
@@ -89,24 +87,36 @@ class KeywordExtractor(object):
 	'''
 	def __init__(self):
 		#self.r = Datastore()
-		self.WORD_CTR = itertools.count()
-		self.stemmer = nltk.stem.PorterStemmer()
+		self.WORD_CTR = itertools.count(1)
+		#self.stemmer = nltk.stem.PorterStemmer()
 		self.stopwords = set(['all', 'just', 'being', 'over', 'both', 'through', 'yourselves', 'its', 'before', 'herself', 'had', 'should', 'to', 'only', 'under', 'ours', 'has', 'do', 'them', 'his', 'very', 'they', 'not', 'during', 'now', 'him', 'nor', 'did', 'this', 'she', 'each', 'further', 'where', 'few', 'because', 'doing', 'some', 'are', 'our', 'ourselves', 'out', 'what', 'for', 'while', 'does', 'above', 'between', 't', 'be', 'we', 'who', 'were', 'here', 'hers', 'by', 'on', 'about', 'of', 'against', 's', 'or', 'own', 'into', 'yourself', 'down', 'your', 'from', 'her', 'their', 'there', 'been', 'whom', 'too', 'themselves', 'was', 'until', 'more', 'himself', 'that', 'but', 'don', 'with', 'than', 'those', 'he', 'me', 'myself', 'these', 'up', 'will', 'below', 'can', 'theirs', 'my', 'and', 'then', 'is', 'am', 'it', 'an', 'as', 'itself', 'at', 'have', 'in', 'any', 'if', 'again', 'no', 'when', 'same', 'how', 'other', 'which', 'you', 'after', 'most', 'such', 'why', 'a', 'off', 'i', 'yours', 'so', 'the', 'having', 'once'])
 
-	#@timeit("KeywordExtractor")
-	@throttle
-	def process_item(self, item, spider):
-		text = item['title'] + " . " + item['extracted_text'] + " . " + item['meta_description']
+
+	def tokenize(self, text):
 		words = nltk.wordpunct_tokenize(text)
 		cleaned_words = [self.clean(w) for w in words if w.isalnum() and len(w) > 1 and not w.isdigit()]
-		item['ordered_words'] = cleaned_words
-		item['words'] = set(cleaned_words) - self.stopwords
-		self.buildWordIndex(item)
+		return set(cleaned_words) - self.stopwords
+
+	#@timeit("KeywordExtractor")
+	@final_throttle
+	def process_item(self, item, spider):
+		url_words = self.tokenize(item['url'])
+		title_words = self.tokenize(item['title'])
+		body_words = self.tokenize(item['extracted_text'])
+
+		self.buildWordIndex(item, url_words, "url")
+		self.buildWordIndex(item, title_words, "title")
+		self.buildWordIndex(item, body_words, "body")
+
+		c.update({'spider': 'google'}, {"$inc": {'processed_ctr': 1}})
+
+		try: sys.stderr.write("%s\n", str(item['url']))
+		except: print "Couldnt write to file!", item['url']
 
 		return item
 
 	#@timeit("KeywordExtractor:buildWordIndex")
-	def buildWordIndex(self, item):
+	def buildWordIndex(self, item, text, pos):
 		'''
 		Get current url id
 		For each word in current url's text,
@@ -114,7 +124,8 @@ class KeywordExtractor(object):
 		'''
 		url_id = u.find_one({"url": item['url']}, fields = ['_id'])['_id']
 		word_id = -1
-		for word in item['words']:
+		key = "in_%s" % pos
+		for word in text:
 			#res = w.find_and_modify ({'word': word}, {"$setOnInsert": {"word": word, "_id":self.WORD_CTR.next()}}, upsert = True, full_response=True, new=True)
 			res = w.find_one({'word': word})
 			if res:
@@ -122,12 +133,12 @@ class KeywordExtractor(object):
 			else:
 				word_id = self.WORD_CTR.next()
 				w.insert({'word': word, '_id': word_id})
-			w.update({'_id': word_id}, {"$addToSet": {"present_in": url_id}})
+			w.update({'_id': word_id}, {"$addToSet": {key: url_id}})
 			u.update({'_id': url_id}, {"$addToSet": {"word_vec": word_id}})
 
 
 	def clean(self, s):
-		return self.stemmer.stem(s.lower())
+		return s.lower()
 
 class Analytics(object):
 	'''

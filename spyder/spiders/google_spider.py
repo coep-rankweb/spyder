@@ -17,10 +17,12 @@ class GoogleSpider(CrawlSpider):
 	name = "google"
 	allowed_domains = []
 
-	start_urls = ['http://www.foodnetwork.com/recipes/emeril-lagasse/cajun-jambalaya-recipe2.html', 'http://thebrowser.com/', 'http://www.popphoto.com/', 'http://www.technologyreview.com/', 'http://www.goldmansachs.com/index.html?view=desktop', 'http://www.nationalgeographic.com/', "http://www.nobelprize.org/nobel_prizes/physics/laureates/1921/einstein-bio.html"]
+	#start_urls = ['http://www.foodnetwork.com/recipes/emeril-lagasse/cajun-jambalaya-recipe2.html', 'http://thebrowser.com/', 'http://www.popphoto.com/', 'http://www.technologyreview.com/', 'http://www.goldmansachs.com/index.html?view=desktop', 'http://www.nationalgeographic.com/', "http://www.nobelprize.org/nobel_prizes/physics/laureates/1921/einstein-bio.html"]
+
+	start_urls = ["http://edition.cnn.com"]
 
 	rules = (
-		Rule(SgmlLinkExtractor(allow = (".*", )), callback = 'process', follow = True),
+		Rule(SgmlLinkExtractor(allow = (".*", ), allow_domains = "cnn.com"), callback = 'process', follow = True),
 	)
 
 	MU = os.environ.get("MONGOHQ_URL")
@@ -56,7 +58,7 @@ class GoogleSpider(CrawlSpider):
 				rel_links = sel.xpath('//a/@href').extract()
 				for l in rel_links:
 					link = urljoin(response.url, l)
-					if urlparse(link).scheme in ['http', 'https']:
+					if urlparse(link).scheme in ['http', 'https'] and len(link) < 512:
 						abs_links.append(link)
 				item['link_set'] = set(abs_links)
 
