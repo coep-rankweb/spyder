@@ -18,10 +18,11 @@ class DupeFilter(BaseDupeFilter):
 		return cls(job_dir(settings))
 
 	def request_seen(self, request):
-		if self.r.exists("%s:%s" % (self.SEEN, request.url)):
+		url = request.url.split("?")[0]
+		if self.r.exists("%s:%s" % (self.SEEN, url)):
 			return True
 		else:
-			self.r.set("%s:%s" % (self.SEEN, request.url), 1)
+			self.r.set("%s:%s" % (self.SEEN, url), 1)
 			return None
 
 	def close(self, reason):
