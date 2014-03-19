@@ -110,8 +110,11 @@ class KeywordExtractor(object):
 
 		c.update({'spider': 'google'}, {"$inc": {'processed_ctr': 1}})
 
-		try: sys.stderr.write("%s\n", str(item['url']))
-		except: print "Couldnt write to file!", item['url']
+		try:
+			sys.stderr.write("%s\n" % str(item['url']))
+		except Exception as e:
+			print e
+			print "Couldnt write to file!", item['url']
 
 		return item
 
@@ -156,7 +159,7 @@ class Analytics(object):
 		self.digram(item)
 		self.freq(item)
 		c.update({'spider': 'google'}, {"$inc": {'processed_ctr': 1}})
-		print item['url']
+		#print item['url']
 		return item
 
 	def digram(self, item):
