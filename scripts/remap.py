@@ -1,56 +1,57 @@
-import redis
+from pymongo import MongoClient
+import itertools
 
-r = redis.Redis()
+client = MongoClient()
 
-with open("data/url.txt") as f:
-	for index, url in enumerate(f):
-		url = url.strip()
-		old_id =  r.get("URL2ID:" + url)
-		r.set("MAP:%s" % old_id, index + 1)
-		r.set("URL2ID:%s" % url, index + 1)
-		r.set("ID2URL:%d" % (index + 1), url)
-		r.sadd("MAPPED", index + 1)
-		r.sadd("MAPPED_OLD", old_id)
+url = client['SPIDER_DB']['URL_DATA']
+nurl = client['SPIDER_DB']['PROC_URL_DATA']
 
-oldf = open ("data/matrix.mtx")
-newf = open ("data/web.mtx", "w")
-newf.write("%%MatrixMarket matrix coordinate real general\n%\n\n")
+url.remove({'out_links':{'$exists':False}})
 
-num_edges = 0
-for line in oldf:
-	row, col, val = line.strip().split()
-	u = r.get("MAP:" + row)
-	if u:
-		v = r.get("MAP:" + col)
-		if v:
-			newf.write("%s\t%s\t%s\n" % (u, v, val))
-			num_edges += 1
-			r.sadd("IN_LINKS:%s" % v, u)
-			r.sadd("OUT_LINKS:%s" % u, v)
+count = 1
+for entry in url.find():
+	url.update(entry, {'$set':{'mtx_index':count}})
+	count += 1
 
-for i in r.smembers ("URL_SET"):
-	if not r.sismember("MAPPED", i):
-		r.delete("ID2URL:%s" % i)
-
-
-oldf.close()
-newf.close()
-
-for word in r.smembers("WORD_SET"):
-	word_id = r.get("WORD2ID:" + word)
-	for u in r.smembers("WORD_IN:" + word_id):
-		if r.get("MAP:" + u):
-			r.sadd("FOUND_IN:" + word_id, r.get("MAP:" + u))
-	r.delete("WORD_IN:" + word_id)
-
-for i in r.smembers("MAPPED_OLD"):
-	r.delete("MAP:" + i)
-
-print "Num nodes:", r.scard("MAPPED")
-print "Num edges:", num_edges
+with open("data/web.mtx", "w") as web:
+	web.write("\n\n\n")
+	rows = url.find().sort('mtx_index')
+	for row in rows:
+		u = row['mtx_index']
+		for col in row['out_links']:
+			try:
+				v = url.find_one({'_id':col})['mtx_index']
+				web.write("%s\t%s\t1\n" % (u, v))
+			except TypeError:
+				pass
 
 
 
-r.delete("URL_SET")
-r.delete("MAPPED_OLD")
-r.delete("MAPPED")
+old_u = None
+with open("data/web.mtx") as web:
+	web.next()
+	web.next()
+	web.next()
+	while True:
+		try:
+			i = web.next()
+			u, v, w = map(int, i.strip().split())
+
+			if not old_u:
+				old_u = u
+				out_links = set()
+				newobj = url.find_one({'mtx_index':u})
+				newobj['_id'] = newobj['mtx_index']
+				del newobj['mtx_index']
+
+			if old_u == u:
+				out_links.add(v)
+			else:
+				newobj['out_links'] = list(out_links)
+				nurl.insert(newobj)
+				web = itertools.chain([i], web)
+				old_u = None
+
+		except StopIteration:
+			break
+
