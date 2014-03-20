@@ -2,7 +2,6 @@ FLAGS =
 clear:
 	make reset && make init && make on
 reset:
-	redis-cli flushdb
 	python -c 'from control import *; reset();'
 	rm -rf spyder/*.pyc
 	rm -rf spyder/spiders/*.pyc
