@@ -12,6 +12,7 @@ sys.path.extend(["../", "spyder/"])
 from defines import *
 import traceback
 from pymongo import MongoClient
+import redis
 
 class GoogleSpider(CrawlSpider):
 	name = "google"
@@ -20,6 +21,7 @@ class GoogleSpider(CrawlSpider):
 	#start_urls = ['http://www.foodnetwork.com/recipes/emeril-lagasse/cajun-jambalaya-recipe2.html', 'http://thebrowser.com/', 'http://www.popphoto.com/', 'http://www.technologyreview.com/', 'http://www.goldmansachs.com/index.html?view=desktop', 'http://www.nationalgeographic.com/', "http://www.nobelprize.org/nobel_prizes/physics/laureates/1921/einstein-bio.html"]
 
 	start_urls = ["http://edition.cnn.com"]
+	#start_urls = ["http://www.stanford.edu"]
 
 	rules = (
 		Rule(SgmlLinkExtractor(allow = (".*", ), allow_domains = "cnn.com"), callback = 'process', follow = True),
@@ -30,9 +32,11 @@ class GoogleSpider(CrawlSpider):
 	if MU: db = r[urlparse(MU).path[1:]]
 	else: db = r[DB_NAME]
 	c = db[CRAWLER_DATA]
+	red = redis.Redis()
 
 	def process(self, response):
-		status = self.c.find_one({'spider': 'google'})['POWER_SWITCH']
+		#status = self.c.find_one({'spider': 'google'})['POWER_SWITCH']
+		status = self.red.get("POWER_SWITCH")
 		item = WebItem()
 		if status == "KILL":
 			raise CloseSpider("shutdown")
