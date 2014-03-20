@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath('../'))
 from defines import *
 from pymongo import MongoClient
 from urlparse import urlparse
+import redis
 
 
 def throttle(method):
@@ -22,7 +23,9 @@ def final_throttle(method):
 			if MU: db = r[urlparse(MU).path[1:]]
 			else: db = r[DB_NAME]
 			c = db[CRAWLER_DATA]
-			c.update({"spider": "google"}, {"$set": {"POWER_SWITCH": "KILL"}})
+			red = redis.Redis()
+			red.set("POWER_SWITCH", "KILL")
+			#c.update({"spider": "google"}, {"$set": {"POWER_SWITCH": "KILL"}})
 			return item
 		return method(class_obj, item, *args, **kwargs)
 	return wrapper
