@@ -7,6 +7,7 @@ client = MongoClient()
 url = client['SPIDER_DB']['URL_DATA']
 nurl = client['SPIDER_DB']['PROC_URL_DATA']
 
+'''
 url.remove({'out_links' : {'$exists':False}})
 
 count = 1
@@ -68,6 +69,7 @@ with open("data/web.mtx") as web:
 			break
 
 print "built PROC_URL_DATA"
+'''
 
 word = client['SPIDER_DB']['WORD_DATA']
 nword = client['SPIDER_DB']['PROC_WORD_DATA']
@@ -75,23 +77,23 @@ nword = client['SPIDER_DB']['PROC_WORD_DATA']
 d = {}	# maps old _id to new _id (mtx_index)
 in_list = ['in_url', 'in_body', 'in_title']
 for entry in word.find():
-	set_dict = { key: set() for key in in_list }
+	list_dict = { key: list() for key in in_list }
 	print entry['word']
 
 	for s in in_list:
 		try:
 			for u in entry[s]:
-				if u in d:
-					url_id = d[u]
+				_id = int(u.keys()[0])
+				if _id in d:
+					url_id = d[_id]
 				else:
-					url_id = url.find_one({"_id" : u})['mtx_index']
+					url_id = url.find_one({"_id" : _id})['mtx_index']
 			
-				set_dict[s].add(url_id)
+				list_dict[s].append({str(url_id):u[_id]})
 		except KeyError:
 			pass
 
 	newobj = entry
 	for s in in_list:
-		newobj[s] = list(set_dict[s])
-
+		newobj[s] = list_dict[s]
 	nword.insert(newobj)

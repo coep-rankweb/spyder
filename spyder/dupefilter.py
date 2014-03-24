@@ -18,6 +18,7 @@ class DupeFilter(BaseDupeFilter):
 		return cls(job_dir(settings))
 
 	def request_seen(self, request):
+		url = request.url.split("/comment")[0]
 		url = request.url.split("?")[0]
 		if self.r.exists("%s:%s" % (self.SEEN, url)):
 			return True

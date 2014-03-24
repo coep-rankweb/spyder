@@ -13,6 +13,10 @@ from pymongo import MongoClient
 from urlparse import urlparse
 import redis
 
+from bs4 import BeautifulSoup
+import re
+from unidecode import unidecode
+
 MU = os.environ.get("MONGOHQ_URL")
 r = MongoClient(MU)
 if MU: db = r[urlparse(MU).path[1:]]
@@ -60,7 +64,7 @@ class Gatekeeper(object):
 		url_obj = u.find_one({'url': item['url']})
 		if not url_obj:
 			url_id = self.URL_CTR.next()
-			u.insert({'_id': url_id, 'url': item['url']})
+			u.insert({'_id': url_id, 'url': item['url'], 'title': item['title']})
 		else:
 			url_id = url_obj['_id']
 		item['url_id'] = url_id
@@ -82,6 +86,21 @@ class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
 	def __init__(self):
 		self.flag = False
+
+
+	def clean(b):
+		try: b = unicode(b, "UTF-8")
+		except: pass
+		b = unidecode(b)
+		soup = BeautifulSoup(b)
+		all_tags = soup.find_all()
+		to_remove = soup.find_all(class_ = re.compile(".*comment.*"))
+		cleaned_tags = []
+		for elem in all_tags:
+			if elem in to_remove: pass
+			else: cleaned_tags.append(elem)
+		return "\n".join((str(x) for x in cleaned_tags))
+
 
 	#@timeit("TextExtractor")
 	#@throttle
@@ -115,9 +134,15 @@ class KeywordExtractor(object):
 
 
 	def tokenize(self, text):
+		d = {}
 		words = nltk.wordpunct_tokenize(text)
 		cleaned_words = [self.clean(w) for w in words if w.isalnum() and len(w) > 1 and not w.isdigit()]
-		return set(cleaned_words) - self.stopwords
+		for word in cleaned_words:
+			if word not in self.stopwords:
+				try: d[word] += 1
+				except KeyError: d[word] = 1
+
+		return d
 
 	#@timeit("KeywordExtractor")
 	#@final_throttle
@@ -134,13 +159,13 @@ class KeywordExtractor(object):
 		host = p.hostname.replace("www.", " ").replace(".com", " ")
 		path = p.path.replace(".html", " ").replace(".htm", " ")
 
-		url_words = self.tokenize(host + " " + path)
-		title_words = self.tokenize(item['title'])
-		body_words = self.tokenize(item['extracted_text'])
+		d_url = self.tokenize(host + " " + path)
+		d_title = self.tokenize(item['title'])
+		d_body = self.tokenize(item['extracted_text'])
 
-		self.buildWordIndex(item, url_words, "url")
-		self.buildWordIndex(item, title_words, "title")
-		self.buildWordIndex(item, body_words, "body")
+		self.buildWordIndex(item, d_url, "url")
+		self.buildWordIndex(item, d_title, "title")
+		self.buildWordIndex(item, d_body, "body")
 
 		red.incr("processed_ctr", 1)
 
@@ -149,7 +174,7 @@ class KeywordExtractor(object):
 		return item
 
 	#@timeit("KeywordExtractor:buildWordIndex")
-	def buildWordIndex(self, item, text, pos):
+	def buildWordIndex(self, item, text_dict, pos):
 		'''
 		Get current url id
 		For each word in current url's text,
@@ -162,17 +187,20 @@ class KeywordExtractor(object):
 		url_id = item['url_id']
 		word_id = -1
 		key = "in_%s" % pos
-		word_set = set()
-		for word in text:
+		word_list = []
+		for word in text_dict:
 			res = w.find_one({'word': word})
 			if res:
 				word_id = res['_id']
 			else:
 				word_id = self.WORD_CTR.next()
 				w.insert({'word': word, '_id': word_id})
-			word_set.add(word_id)
-			w.update({'_id': word_id}, {"$addToSet": {key: url_id}})
-		u.update({'_id': url_id}, {"$set": {"word_vec": list(word_set)}})
+
+			word_list.append({str(word_id): text_dict[word]})
+
+			w.update({'_id': word_id}, {"$addToSet": {key: {str(url_id): text_dict[word]}}})
+
+		u.update({'_id': url_id}, {"$set": {"word_vec": word_list}})
 		#print "WORD_VEC:" + item['url']
 
 

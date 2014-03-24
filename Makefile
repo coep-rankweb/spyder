@@ -11,7 +11,7 @@ reset:
 crawl:
 	rm -f *.pyc
 	scrapy crawl google $(FLAGS) 2> data/timelog
-	python scripts/remap.py
+	#python scripts/remap.py
 
 init:
 	python -c 'import control; control.init();'
