@@ -43,7 +43,7 @@ class Gatekeeper(object):
 	#@timeit("DuplicatesFilter")
 	#@throttle
 	def process_item(self, item, spider):
-		if int(red.get("processed_ctr")) > 200000: item['shutdown'] = True
+		if int(red.get("processed_ctr")) > 100000: item['shutdown'] = True
 		if item['shutdown']: self.flag = True
 		if self.flag:
 			return item
@@ -144,7 +144,8 @@ class KeywordExtractor(object):
 
 		red.incr("processed_ctr", 1)
 
-		sys.stderr.write("%s\n" % str(item['url']))
+		print item['url']
+		sys.stderr.write("%s\t:\t%s\n" % (item['url_id'], item['url']))
 		return item
 
 	#@timeit("KeywordExtractor:buildWordIndex")

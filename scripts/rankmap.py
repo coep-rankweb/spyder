@@ -1,31 +1,14 @@
-import redis
-import sys
+from pymongo import MongoClient
 
-r = redis.Redis()
+client = MongoClient()
 
-DEFAULT = "../cusp/b_cpu"
-RANK = "RANK"
-SORTED_WORD_IN = "SORTED_WORD_IN"
-WORD2ID = "WORD2ID"
-FOUND_IN = "FOUND_IN"
+url = client.SPIDER_DB.PROC_URL_DATA
 
-try:
-	f = open (sys.argv[1])
-except IndexError:
-	f = open (DEFAULT)
+fpath = "/home/nvidia/kernel_panic/core/cusp/a_gpu"
 
-for i, l in enumerate(f):
-	r.set(RANK + ":" + str(i + 1), l.strip())
-
-f.close ()
-
-for word in r.smembers("WORD_SET"):
-	word_id = r.get(WORD2ID + ":" + word)
-	for url_id in r.smembers(FOUND_IN + ":" + word_id):
-		rank = r.get(RANK + ":" + url_id)
-		r.zadd(SORTED_WORD_IN + ":" + word_id, url_id, float(rank))
-
-# to be commented if everything screws up
-for word in r.smembers("WORD_SET"):
-	word_id = r.get(WORD2ID + ":" + word)
-	r.delete(FOUND_IN + ":" + word_id)
+with open(fpath) as rank_file:
+	count = 1
+	for rank in rank_file:
+		url.update({"_id" : count}, {"$set" : {"rank": float(rank.strip())}})
+		count += 1
+	print count
