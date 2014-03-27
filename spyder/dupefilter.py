@@ -4,7 +4,6 @@ sys.path.append(os.path.abspath('../'))
 from scrapy.utils.job import job_dir
 import redis
 from scrapy.dupefilter import BaseDupeFilter
-from pyhashxx import hashxx
 
 class DupeFilter(BaseDupeFilter):
 	"""Request Fingerprint duplicates filter"""

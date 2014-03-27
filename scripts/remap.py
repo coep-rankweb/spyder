@@ -6,13 +6,12 @@ client = MongoClient()
 
 url = client['SPIDER_DB']['URL_DATA']
 nurl = client['SPIDER_DB']['PROC_URL_DATA']
-
 '''
 url.remove({'out_links' : {'$exists':False}})
 
 count = 1
 for entry in url.find():
-	print url.update(entry, {'$set' : {'mtx_index':count}}), count
+	url.update(entry, {'$set' : {'mtx_index':count}})
 	count += 1
 
 print "built mtx_index"
@@ -34,8 +33,22 @@ with open("data/web.mtx", "w") as web:
 		if count % 1000 == 0: print count
 
 print "built web.mtx"
+'''
+count = 1
+for entry in url.find():
+	newobj = entry
+	newobj['_id'] = newobj['mtx_index']
+	del newobj['mtx_index']
+	newobj['out_links'] = []
+	for out in entry['out_links']:
+		obj = url.find_one({'_id': out})
+		if obj.has_key('mtx_index'):
+			newobj['out_links'].append(out)
+	nurl.insert(newobj)
+	if count % 100 == 0: print count
+	count += 1
 
-
+'''
 old_u = None
 with open("data/web.mtx") as web:
 	web.next()
@@ -67,33 +80,46 @@ with open("data/web.mtx") as web:
 			newobj['out_links'] = list(out_links)
 			nurl.insert(newobj)
 			break
-
-print "built PROC_URL_DATA"
 '''
+print "built PROC_URL_DATA"
 
 word = client['SPIDER_DB']['WORD_DATA']
 nword = client['SPIDER_DB']['PROC_WORD_DATA']
 
 d = {}	# maps old _id to new _id (mtx_index)
-in_list = ['in_url', 'in_body', 'in_title']
+in_list = [u'in_url', u'in_body', u'in_title']
 for entry in word.find():
 	list_dict = { key: list() for key in in_list }
-	print entry['word']
+	print "WORD:", entry
 
 	for s in in_list:
 		try:
 			for u in entry[s]:
-				_id = int(u.keys()[0])
+				_id = u['url']	# old url id
 				if _id in d:
 					url_id = d[_id]
 				else:
-					url_id = url.find_one({"_id" : _id})['mtx_index']
+					uobj = url.find_one({'_id': _id})
+					url_id = uobj['mtx_index']
+					d[_id] = url_id
+				print "%d  ->  %d\t(%d)" % (url_id, u['freq'], _id)
 			
-				list_dict[s].append({str(url_id):u[_id]})
+				list_dict[s].append({'url': url_id, 'freq': u['freq']})
 		except KeyError:
+			print "key error"
 			pass
 
 	newobj = entry
 	for s in in_list:
 		newobj[s] = list_dict[s]
 	nword.insert(newobj)
+
+# hopefully removing the noise
+nurl.update({}, {"$pull": {'word_vec': {'freq': {"$lt": 2}}}}, multi = True)
+nword.update({}, {"$pull": {'in_body': {'freq': {"$lt": 2}}}}, multi = True)
+
+nword.remove({
+	"in_body": {"$size": 0},
+	"in_title": {"$size": 0},
+	"in_url": {"$size": 0}
+})

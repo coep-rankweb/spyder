@@ -1,4 +1,4 @@
-FLAGS =
+FLAGS = -s JOBDIR=data/
 clear:
 	make reset && make init && make on
 reset:
@@ -7,6 +7,7 @@ reset:
 	rm -rf spyder/spiders/*.pyc
 	rm -rf scripts/*.pyc
 	rm -rf data/*
+	rm -f *.pyc
 
 crawl:
 	rm -f *.pyc

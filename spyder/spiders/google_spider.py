@@ -18,13 +18,10 @@ class GoogleSpider(CrawlSpider):
 	name = "google"
 	allowed_domains = []
 
-	#start_urls = ['http://www.foodnetwork.com/recipes/emeril-lagasse/cajun-jambalaya-recipe2.html', 'http://thebrowser.com/', 'http://www.popphoto.com/', 'http://www.technologyreview.com/', 'http://www.goldmansachs.com/index.html?view=desktop', 'http://www.nationalgeographic.com/', "http://www.nobelprize.org/nobel_prizes/physics/laureates/1921/einstein-bio.html"]
-
-	start_urls = ["http://edition.cnn.com"]
-	#start_urls = ["http://www.stanford.edu"]
+	start_urls = ["http://www.stanford.edu/"]
 
 	rules = (
-		Rule(SgmlLinkExtractor(allow = (".*", ), allow_domains = "cnn.com"), callback = 'process', follow = True),
+		Rule(SgmlLinkExtractor(allow = (".*", ), allow_domains = "stanford.edu"), callback = 'process', follow = True),
 	)
 
 	MU = os.environ.get("MONGOHQ_URL")
@@ -46,9 +43,11 @@ class GoogleSpider(CrawlSpider):
 
 				item['shutdown'] = False
 
-				name = sel.xpath("//title/text()").extract()
-				if name: item['title'] = self.clean(name[0])
-				else: item['title'] = ""
+				try:
+					name = sel.xpath("//title/text()").extract()
+					item['title'] = name[0]
+				except:
+					item['title'] = "Calvin"
 
 				item['url'] = response.url
 				item['raw_html'] = response.body
