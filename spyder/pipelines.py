@@ -24,6 +24,8 @@ else: db = r[DB_NAME]
 u = db[URL_DATA]
 w = db[WORD_DATA]
 c = db[CRAWLER_DATA]
+arch_u = db[ARCHIVE_URL_DATA]
+arch_w = db[ARCHIVE_WORD_DATA]
 
 red = redis.Redis()
 #co = db[COLLOCATIONS_DATA]
@@ -31,6 +33,8 @@ red = redis.Redis()
 
 u.create_index('url')
 w.create_index('word')
+arch_u.create_index('url')
+arch_w.create_index('word')
 #co.create_index('base')
 
 class Gatekeeper(object):
@@ -61,6 +65,7 @@ class Gatekeeper(object):
 			# no id assigned, never seen this url before
 			url_id = self.URL_CTR.next()
 			u.insert({'_id': url_id, 'url': item['url'], 'title': item['title']})
+			arch_u.insert({'_id': url_id, 'url': item['url'], 'title': item['title']})
 		elif url_obj.has_key('title'):
 			# url has been processed and assigned a title
 			url_id = url_obj['_id']
@@ -68,6 +73,7 @@ class Gatekeeper(object):
 			# url has been assigned an id as an outlink of some processed page
 			url_id = url_obj['_id']
 			u.update(url_obj, {'$set': {'title': item['title']}})
+			arch_u.update(url_obj, {'$set': {'title': item['title']}})
 			
 		item['url_id'] = url_id
 
@@ -77,10 +83,12 @@ class Gatekeeper(object):
 			if not res:
 				new_url_id = self.URL_CTR.next()
 				u.insert({'_id': new_url_id, 'url': link})
+				arch_u.insert({'_id': new_url_id, 'url': link})
 			else:
 				new_url_id = res['_id']
 			out_links.add(new_url_id)
 		u.update({'_id': url_id}, {"$set": {"out_links": list(out_links)}})
+		arch_u.update({'_id': url_id}, {"$set": {"out_links": list(out_links)}})
 
 class TextExtractor(object):
 	''' Extracts text from the raw_html field of the item '''
@@ -116,6 +124,7 @@ class KeywordExtractor(object):
 	def __init__(self):
 		self.WORD_CTR = itertools.count(1)
 		self.flag = False
+		self.score = { 'url':10, 'title':10, 'body':1 }
 		self.stopwords = set(['all', 'just', 'being', 'over', 'both', 'through', 'yourselves', 'its', 'before', 'herself', 'had', 'should', 'to', 'only', 'under', 'ours', 'has', 'do', 'them', 'his', 'very', 'they', 'not', 'during', 'now', 'him', 'nor', 'did', 'this', 'she', 'each', 'further', 'where', 'few', 'because', 'doing', 'some', 'are', 'our', 'ourselves', 'out', 'what', 'for', 'while', 'does', 'above', 'between', 't', 'be', 'we', 'who', 'were', 'here', 'hers', 'by', 'on', 'about', 'of', 'against', 's', 'or', 'own', 'into', 'yourself', 'down', 'your', 'from', 'her', 'their', 'there', 'been', 'whom', 'too', 'themselves', 'was', 'until', 'more', 'himself', 'that', 'but', 'don', 'with', 'than', 'those', 'he', 'me', 'myself', 'these', 'up', 'will', 'below', 'can', 'theirs', 'my', 'and', 'then', 'is', 'am', 'it', 'an', 'as', 'itself', 'at', 'have', 'in', 'any', 'if', 'again', 'no', 'when', 'same', 'how', 'other', 'which', 'you', 'after', 'most', 'such', 'why', 'a', 'off', 'i', 'yours', 'so', 'the', 'having', 'once'])
 
 
@@ -139,10 +148,26 @@ class KeywordExtractor(object):
 		d_title = self.tokenize(item['title'])
 		d_body = self.tokenize(item['extracted_text'])
 
-		self.buildWordIndex(item, d_url, "url")
-		self.buildWordIndex(item, d_title, "title")
-		self.buildWordIndex(item, d_body, "body")
+		url_list = self.buildWordIndex(item, d_url, "url")
+		title_list = self.buildWordIndex(item, d_title, "title")
+		body_list = self.buildWordIndex(item, d_body, "body")
 
+		d = {}
+		for word_dict in url_list:
+			d[word_dict['word']] = d.get(word_dict['word'], 0) + word_dict['freq']
+
+		for word_dict in title_list:
+			d[word_dict['word']] = d.get(word_dict['word'], 0) + word_dict['freq']
+
+		for word_dict in body_list:
+			d[word_dict['word']] = d.get(word_dict['word'], 0) + word_dict['freq']
+
+		word_list = [ {'word':i, 'score':d[i]} for i in d ]
+
+		for i in word_list:
+			w.update({'_id': i['word']}, {"$addToSet": {'present_in': {"url": item['url_id'], "score": i['score']}}})
+
+		u.update({'_id': item['url_id']}, {"$set": {"word_vec": word_list}})
 		c.update({'spider': 'google'}, {"$inc": {'url_count': 1}})
 		red.incr("processed_ctr", 1)
 
@@ -161,6 +186,8 @@ class KeywordExtractor(object):
 		word_id = -1
 		key = "in_%s" % pos
 		word_list = []
+		url_list = []
+
 		for word in text_dict:
 			res = w.find_one({'word': word})
 			if res:
@@ -168,14 +195,16 @@ class KeywordExtractor(object):
 			else:
 				word_id = self.WORD_CTR.next()
 				w.insert({'word': word, '_id': word_id})
+				arch_w.insert({'word': word, '_id': word_id})
 				c.update({'spider': 'google'}, {"$inc": {'word_count': 1}})
 
-			word_list.append({"word": word_id, "freq": text_dict[word]})
+			word_list.append({ "word": word_id, "freq": text_dict[word] * self.score[pos] })
 
-			w.update({'_id': word_id}, {"$addToSet": {key: {"url": url_id, "freq": text_dict[word]}}})
+			arch_w.update({'_id': word_id}, {"$addToSet": {key: {"url": url_id, "freq": text_dict[word]}}})
 
-		u.update({'_id': url_id}, {"$set": {"word_vec": word_list}})
+		arch_u.update({'_id': url_id}, {"$set": {"word_vec": word_list}})
 
+		return word_list
 
 	def clean(self, s):
 		return s.lower()
